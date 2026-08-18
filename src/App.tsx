@@ -1,16 +1,27 @@
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { LoginPage } from "@/pages/Login";
+import { RegisterPage } from "@/pages/Register";
+
 function App() {
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center">
-      <div className="text-center animate-bounce-in">
-        <h1 className="text-5xl font-bold text-primary mb-4">Money Manager</h1>
-        <p className="text-muted-foreground text-lg">Candy Theme Configurado</p>
-        <div className="flex gap-3 justify-center mt-6">
-          <div className="h-10 w-10 rounded-full bg-primary shadow-primary" />
-          <div className="h-10 w-10 rounded-full bg-secondary shadow-secondary" />
-          <div className="h-10 w-10 rounded-full bg-tertiary shadow-tertiary" />
-        </div>
-      </div>
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/"
+          element={
+            <ProtectedRoute>
+              <div className="min-h-screen bg-background flex items-center justify-center">
+                <h1 className="text-3xl font-bold text-primary">Dashboard (PR4)</h1>
+              </div>
+            </ProtectedRoute>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
 
