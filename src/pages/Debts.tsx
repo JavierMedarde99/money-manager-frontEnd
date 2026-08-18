@@ -1,6 +1,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { debtApi } from "@/api/debt";
-import type { DebtResponseDTO, DebtRequestDTO } from "@/types";
+import { paymentApi } from "@/api/payment";
+import type {
+  DebtResponseDTO,
+  DebtRequestDTO,
+  PaymentRequestDTO,
+} from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -32,6 +37,7 @@ import {
   ChevronUp,
   Calendar,
   DollarSign,
+  Banknote,
 } from "lucide-react";
 
 export function DebtsPage() {
@@ -43,11 +49,18 @@ export function DebtsPage() {
   const [saving, setSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
-  // Form
+  // Debt form
   const [name, setName] = useState("");
   const [totalAmount, setTotalAmount] = useState<number>(0);
   const [starDate, setStarDate] = useState("");
   const [endDate, setEndDate] = useState("");
+
+  // Payment form
+  const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
+  const [paymentDebt, setPaymentDebt] = useState<DebtResponseDTO | null>(null);
+  const [paymentDate, setPaymentDate] = useState("");
+  const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [savingPayment, setSavingPayment] = useState(false);
 
   const fetchDebts = useCallback(async () => {
     try {
@@ -116,6 +129,36 @@ export function DebtsPage() {
       console.error("Error deleting debt:", error);
     } finally {
       setDeleteConfirm(null);
+    }
+  };
+
+  const openPaymentDialog = (debt: DebtResponseDTO) => {
+    setPaymentDebt(debt);
+    setPaymentDate(new Date().toISOString().split("T")[0]);
+    const remaining = getRemainingAmount(debt);
+    setPaymentAmount(remaining > 0 ? remaining : 0);
+    setPaymentDialogOpen(true);
+  };
+
+  const handleSavePayment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!paymentDebt) return;
+    setSavingPayment(true);
+
+    const payload: PaymentRequestDTO = {
+      paymentDate,
+      amount: paymentAmount,
+      debt: paymentDebt,
+    };
+
+    try {
+      await paymentApi.insert(payload);
+      setPaymentDialogOpen(false);
+      await fetchDebts();
+    } catch (error) {
+      console.error("Error saving payment:", error);
+    } finally {
+      setSavingPayment(false);
     }
   };
 
@@ -213,13 +256,25 @@ export function DebtsPage() {
                         />
                       </div>
                       <Badge variant={isPaid ? "tertiary" : "default"}>
-                        {isPaid
-                          ? "Pagada"
-                          : `${Math.round(progress)}%`}
+                        {isPaid ? "Pagada" : `${Math.round(progress)}%`}
                       </Badge>
                     </div>
                   </div>
                   <div className="flex items-center gap-1">
+                    {!isPaid && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openPaymentDialog(debt);
+                        }}
+                        className="text-green-600 hover:text-green-700"
+                        title="Registrar pago"
+                      >
+                        <Banknote className="h-4 w-4" />
+                      </Button>
+                    )}
                     <Button
                       variant="ghost"
                       size="icon"
@@ -254,9 +309,23 @@ export function DebtsPage() {
                   <div className="animate-bounce-in">
                     <Separator />
                     <div className="p-4">
-                      <h4 className="font-bold text-sm mb-3">
-                        Pagos ({debt.payments?.length || 0})
-                      </h4>
+                      <div className="flex items-center justify-between mb-3">
+                        <h4 className="font-bold text-sm">
+                          Pagos ({debt.payments?.length || 0})
+                        </h4>
+                        {!isPaid && (
+                          <Button
+                            size="sm"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              openPaymentDialog(debt);
+                            }}
+                          >
+                            <Banknote className="h-3 w-3" />
+                            Registrar Pago
+                          </Button>
+                        )}
+                      </div>
                       {!debt.payments || debt.payments.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
                           No se han registrado pagos para esta deuda
@@ -273,8 +342,8 @@ export function DebtsPage() {
                             {debt.payments.map((payment) => (
                               <TableRow key={payment.id}>
                                 <TableCell>{payment.paymentDate}</TableCell>
-                                <TableCell className="text-right font-semibold">
-                                  {payment.amount.toFixed(2)} €
+                                <TableCell className="text-right font-semibold text-green-600">
+                                  -{payment.amount.toFixed(2)} €
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -290,7 +359,7 @@ export function DebtsPage() {
         </div>
       )}
 
-      {/* Create/Edit Dialog */}
+      {/* Create/Edit Debt Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent onClose={() => setDialogOpen(false)}>
           <DialogHeader>
@@ -357,6 +426,68 @@ export function DebtsPage() {
                   "Guardar"
                 ) : (
                   "Crear"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Payment Dialog */}
+      <Dialog
+        open={paymentDialogOpen}
+        onOpenChange={setPaymentDialogOpen}
+      >
+        <DialogContent onClose={() => setPaymentDialogOpen(false)}>
+          <DialogHeader>
+            <DialogTitle>Registrar Pago</DialogTitle>
+          </DialogHeader>
+          {paymentDebt && (
+            <div className="mb-4 p-3 rounded-xl bg-muted">
+              <p className="text-sm font-semibold">{paymentDebt.name}</p>
+              <p className="text-xs text-muted-foreground">
+                Restante: {getRemainingAmount(paymentDebt).toFixed(2)} €
+              </p>
+            </div>
+          )}
+          <form onSubmit={handleSavePayment} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="pay-date">Fecha del pago</Label>
+                <Input
+                  id="pay-date"
+                  type="date"
+                  value={paymentDate}
+                  onChange={(e) => setPaymentDate(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="pay-amount">Monto (€)</Label>
+                <Input
+                  id="pay-amount"
+                  type="number"
+                  min="0.01"
+                  step="0.01"
+                  value={paymentAmount}
+                  onChange={(e) => setPaymentAmount(Number(e.target.value))}
+                  required
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setPaymentDialogOpen(false)}
+              >
+                Cancelar
+              </Button>
+              <Button type="submit" disabled={savingPayment}>
+                {savingPayment ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Registrar Pago"
                 )}
               </Button>
             </DialogFooter>
