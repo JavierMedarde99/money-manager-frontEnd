@@ -5,21 +5,13 @@ import { LoginPage } from "@/pages/Login";
 import { RegisterPage } from "@/pages/Register";
 import { CategoriesPage } from "@/pages/Categories";
 import { TransactionsPage } from "@/pages/Transactions";
+import { DebtsPage } from "@/pages/Debts";
 
 function DashboardPage() {
   return (
     <div className="animate-bounce-in">
       <h1 className="text-3xl font-bold text-card-foreground mb-2">Dashboard</h1>
       <p className="text-muted-foreground">Bienvenido a Money Manager</p>
-    </div>
-  );
-}
-
-function DebtsPage() {
-  return (
-    <div className="animate-bounce-in">
-      <h1 className="text-3xl font-bold text-card-foreground mb-2">Deudas</h1>
-      <p className="text-muted-foreground">Controla tus deudas</p>
     </div>
   );
 }
