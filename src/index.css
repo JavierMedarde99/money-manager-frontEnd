@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+@theme {
+  /* Candy — Joyful Pop */
+  --color-primary: #e040a0;
+  --color-secondary: #7c52aa;
+  --color-tertiary: #0096cc;
+  --color-background: #fef7ff;
+
+  /* Primary shades */
+  --color-primary-50: #fdf2f9;
+  --color-primary-100: #fce7f3;
+  --color-primary-200: #fbcfe8;
+  --color-primary-300: #f9a8d4;
+  --color-primary-400: #f472b6;
+  --color-primary-500: #e040a0;
+  --color-primary-600: #c02585;
+  --color-primary-700: #9d174d;
+  --color-primary-800: #831843;
+  --color-primary-900: #500724;
+
+  /* Secondary shades */
+  --color-secondary-50: #f5f0fc;
+  --color-secondary-100: #ede5f8;
+  --color-secondary-200: #ddd0f2;
+  --color-secondary-300: #c4ace7;
+  --color-secondary-400: #a882dc;
+  --color-secondary-500: #7c52aa;
+  --color-secondary-600: #6b3f94;
+  --color-secondary-700: #5a317d;
+  --color-secondary-800: #4a2767;
+  --color-secondary-900: #3a1e51;
+
+  /* Tertiary shades */
+  --color-tertiary-50: #e6f7fd;
+  --color-tertiary-100: #ccf0fb;
+  --color-tertiary-200: #99e0f6;
+  --color-tertiary-300: #66d1f2;
+  --color-tertiary-400: #33c1ed;
+  --color-tertiary-500: #0096cc;
+  --color-tertiary-600: #007aab;
+  --color-tertiary-700: #005d8a;
+  --color-tertiary-800: #00416a;
+  --color-tertiary-900: #002449;
+
+  /* Neutral */
+  --color-muted: #f8f5fa;
+  --color-muted-foreground: #6b6375;
+  --color-card: #ffffff;
+  --color-card-foreground: #1a1125;
+  --color-border: #e8e0ee;
+  --color-input: #e8e0ee;
+  --color-ring: #e040a0;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #1a1125;
+
+  /* Radius — pill */
+  --radius-sm: 9999px;
+  --radius-md: 9999px;
+  --radius-lg: 9999px;
+  --radius-xl: 20px;
+  --radius-2xl: 16px;
+
+  /* Font */
+  --font-sans: "DM Sans", system-ui, sans-serif;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-card-foreground font-sans antialiased;
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  h1, h2, h3, h4 {
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+}
+
+/* Bouncy microinteractions */
+@keyframes bounce-in {
+  0% { transform: scale(0.95); opacity: 0; }
+  60% { transform: scale(1.03); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes bounce-hover {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.04); }
+  100% { transform: scale(1); }
+}
+
+.animate-bounce-in {
+  animation: bounce-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.hover-bouncy {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.3s ease;
+}
+
+.hover-bouncy:hover {
+  transform: scale(1.03);
+}
+
+/* Colorful tinted shadows */
+.shadow-primary {
+  box-shadow: 0 4px 16px rgba(224, 64, 160, 0.2);
+}
+
+.shadow-secondary {
+  box-shadow: 0 4px 16px rgba(124, 82, 170, 0.2);
+}
+
+.shadow-tertiary {
+  box-shadow: 0 4px 16px rgba(0, 150, 204, 0.2);
+}
+
+/* Color picker input reset */
+input[type="color"] {
+  -webkit-appearance: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+input[type="color"]::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 9999px;
+}
