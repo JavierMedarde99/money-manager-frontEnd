@@ -4,21 +4,13 @@ import { MainLayout } from "@/components/layout/MainLayout";
 import { LoginPage } from "@/pages/Login";
 import { RegisterPage } from "@/pages/Register";
 import { CategoriesPage } from "@/pages/Categories";
+import { TransactionsPage } from "@/pages/Transactions";
 
 function DashboardPage() {
   return (
     <div className="animate-bounce-in">
       <h1 className="text-3xl font-bold text-card-foreground mb-2">Dashboard</h1>
       <p className="text-muted-foreground">Bienvenido a Money Manager</p>
-    </div>
-  );
-}
-
-function TransactionsPage() {
-  return (
-    <div className="animate-bounce-in">
-      <h1 className="text-3xl font-bold text-card-foreground mb-2">Transacciones</h1>
-      <p className="text-muted-foreground">Gestiona tus transacciones</p>
     </div>
   );
 }
