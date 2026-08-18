@@ -1,7 +1,44 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { MainLayout } from "@/components/layout/MainLayout";
 import { LoginPage } from "@/pages/Login";
 import { RegisterPage } from "@/pages/Register";
+
+function DashboardPage() {
+  return (
+    <div className="animate-bounce-in">
+      <h1 className="text-3xl font-bold text-card-foreground mb-2">Dashboard</h1>
+      <p className="text-muted-foreground">Bienvenido a Money Manager</p>
+    </div>
+  );
+}
+
+function TransactionsPage() {
+  return (
+    <div className="animate-bounce-in">
+      <h1 className="text-3xl font-bold text-card-foreground mb-2">Transacciones</h1>
+      <p className="text-muted-foreground">Gestiona tus transacciones</p>
+    </div>
+  );
+}
+
+function CategoriesPage() {
+  return (
+    <div className="animate-bounce-in">
+      <h1 className="text-3xl font-bold text-card-foreground mb-2">Categorías</h1>
+      <p className="text-muted-foreground">Administra tus categorías</p>
+    </div>
+  );
+}
+
+function DebtsPage() {
+  return (
+    <div className="animate-bounce-in">
+      <h1 className="text-3xl font-bold text-card-foreground mb-2">Deudas</h1>
+      <p className="text-muted-foreground">Controla tus deudas</p>
+    </div>
+  );
+}
 
 function App() {
   return (
@@ -10,15 +47,17 @@ function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route
-          path="/"
           element={
             <ProtectedRoute>
-              <div className="min-h-screen bg-background flex items-center justify-center">
-                <h1 className="text-3xl font-bold text-primary">Dashboard (PR4)</h1>
-              </div>
+              <MainLayout />
             </ProtectedRoute>
           }
-        />
+        >
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/transactions" element={<TransactionsPage />} />
+          <Route path="/categories" element={<CategoriesPage />} />
+          <Route path="/debts" element={<DebtsPage />} />
+        </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </BrowserRouter>
