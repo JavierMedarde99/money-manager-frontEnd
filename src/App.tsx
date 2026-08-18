@@ -3,6 +3,7 @@ import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
 import { LoginPage } from "@/pages/Login";
 import { RegisterPage } from "@/pages/Register";
+import { CategoriesPage } from "@/pages/Categories";
 
 function DashboardPage() {
   return (
@@ -18,15 +19,6 @@ function TransactionsPage() {
     <div className="animate-bounce-in">
       <h1 className="text-3xl font-bold text-card-foreground mb-2">Transacciones</h1>
       <p className="text-muted-foreground">Gestiona tus transacciones</p>
-    </div>
-  );
-}
-
-function CategoriesPage() {
-  return (
-    <div className="animate-bounce-in">
-      <h1 className="text-3xl font-bold text-card-foreground mb-2">Categorías</h1>
-      <p className="text-muted-foreground">Administra tus categorías</p>
     </div>
   );
 }
