@@ -40,8 +40,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem("user", JSON.stringify(profile));
       set({ user: profile, isAuthenticated: true });
     } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
       const message =
-        error instanceof Error ? error.message : "Error al iniciar sesión";
+        axiosError.response?.data?.message || "Error al iniciar sesión";
       set({ error: message, isLoading: false });
       throw error;
     }
@@ -57,8 +58,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.setItem("user", JSON.stringify(profile));
       set({ user: profile, isAuthenticated: true });
     } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
       const message =
-        error instanceof Error ? error.message : "Error al registrarse";
+        axiosError.response?.data?.message || "Error al registrarse";
       set({ error: message, isLoading: false });
       throw error;
     }
