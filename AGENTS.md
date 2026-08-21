@@ -7,6 +7,13 @@ React + Vite + TypeScript frontend for a personal finance manager. Connects to a
 Always use the correct mvp and clean code.
 For every requested change, you must always create a brand new issue, branch, and PR; never reuse any closed ones. Do not apply changes directly. The PR will not be merged until it is approved, and only approved branches may be merged.
 
+When the user asks for a change, the expected workflow is:
+1. Create a GitHub issue describing the change.
+2. Create a feature branch from `main` (e.g. `fix/login-error-messages`).
+3. Make the changes, commit, and push.
+4. Open a PR referencing the issue (e.g. `Closes #12`).
+5. Do NOT merge the PR — the user will review and merge it.
+
 ## Commands
 
 ```bash
@@ -61,9 +68,15 @@ Routes (in `App.tsx`): `/login`, `/register` (public); `/`, `/transactions`, `/c
 
 Auth: Zustand store (`src/store/auth.ts`) persists token + user in `localStorage`. Axios interceptor injects `Authorization: Bearer` header. 401 responses auto-logout and redirect to `/login`.
 
-## Backend API quirks
+## Backend API
 
-The backend at `localhost:8080` has several known issues that affect the frontend:
+The backend URL is configured via environment variables:
+- **Dev** (`npm run dev`): uses `.env` → `http://localhost:8080`
+- **Prod** (`npm run build`): uses `.env.production` → `https://expense-manager-new.onrender.com`
+
+Source: `src/api/client.ts` reads `import.meta.env.VITE_API_URL`.
+
+The backend has several known issues that affect the frontend:
 
 - **Date format**: Backend expects `dd-MM-yyyy` (e.g. `19-08-2026`). HTML `<input type="date">` sends `yyyy-MM-dd`. Transaction create/update will fail with `"invalid date format"` until this mismatch is resolved.
 - **Transaction types**: Only `INCOME` is accepted. `EXPENSE` returns `"invalid value for type not found of Type"`. The frontend dropdown includes EXPENSE which will always fail.
