@@ -32,6 +32,7 @@ export function CategoriesPage() {
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const fetchCategories = async () => {
     try {
@@ -52,6 +53,7 @@ export function CategoriesPage() {
     setEditingCategory(null);
     setName("");
     setColor("#e040a0");
+    setFormError(null);
     setDialogOpen(true);
   };
 
@@ -59,12 +61,14 @@ export function CategoriesPage() {
     setEditingCategory(cat);
     setName(cat.name);
     setColor(cat.color);
+    setFormError(null);
     setDialogOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setFormError(null);
     try {
       const payload: CategoryRequestDTO = { name, color };
       if (editingCategory) {
@@ -74,8 +78,11 @@ export function CategoriesPage() {
       }
       setDialogOpen(false);
       await fetchCategories();
-    } catch (error) {
-      console.error("Error saving category:", error);
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setFormError(
+        axiosError.response?.data?.message || "Error al guardar la categoría"
+      );
     } finally {
       setSaving(false);
     }
@@ -180,6 +187,11 @@ export function CategoriesPage() {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4 mt-4">
+            {formError && (
+              <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
+                {formError}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="cat-name">Nombre</Label>
               <Input

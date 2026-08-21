@@ -58,6 +58,7 @@ export function DebtsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<DebtResponseDTO | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -73,6 +74,7 @@ export function DebtsPage() {
   const [paymentDate, setPaymentDate] = useState("");
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [savingPayment, setSavingPayment] = useState(false);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
 
   const fetchDebts = useCallback(async () => {
     try {
@@ -134,11 +136,15 @@ export function DebtsPage() {
   };
 
   const handleDelete = async (id: number) => {
+    setDeleteError(null);
     try {
       await debtApi.delete(id);
       await fetchDebts();
-    } catch (error) {
-      console.error("Error deleting debt:", error);
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setDeleteError(
+        axiosError.response?.data?.message || "No se puede eliminar la deuda"
+      );
     } finally {
       setDeleteConfirm(null);
     }
@@ -149,6 +155,7 @@ export function DebtsPage() {
     setPaymentDate(new Date().toISOString().split("T")[0]);
     const remaining = getRemainingAmount(debt);
     setPaymentAmount(remaining > 0 ? remaining : 0);
+    setPaymentError(null);
     setPaymentDialogOpen(true);
   };
 
@@ -156,19 +163,23 @@ export function DebtsPage() {
     e.preventDefault();
     if (!paymentDebt) return;
     setSavingPayment(true);
+    setPaymentError(null);
 
     const payload: PaymentRequestDTO = {
       paymentDate: toBackendDate(paymentDate),
       amount: paymentAmount,
-      debt: paymentDebt,
+      debt: { id: paymentDebt.id } as DebtResponseDTO,
     };
 
     try {
       await paymentApi.insert(payload);
       setPaymentDialogOpen(false);
       await fetchDebts();
-    } catch (error) {
-      console.error("Error saving payment:", error);
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setPaymentError(
+        axiosError.response?.data?.message || "Error al registrar el pago"
+      );
     } finally {
       setSavingPayment(false);
     }
@@ -463,6 +474,11 @@ export function DebtsPage() {
             </div>
           )}
           <form onSubmit={handleSavePayment} className="space-y-4">
+            {paymentError && (
+              <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
+                {paymentError}
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="pay-date">Fecha del pago</Label>
@@ -510,26 +526,37 @@ export function DebtsPage() {
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteConfirm !== null}
-        onOpenChange={() => setDeleteConfirm(null)}
+        onOpenChange={() => { setDeleteConfirm(null); setDeleteError(null); }}
       >
-        <DialogContent onClose={() => setDeleteConfirm(null)}>
+        <DialogContent onClose={() => { setDeleteConfirm(null); setDeleteError(null); }}>
           <DialogHeader>
             <DialogTitle>Eliminar Deuda</DialogTitle>
           </DialogHeader>
-          <p className="text-muted-foreground mt-2">
-            ¿Estás seguro de que quieres eliminar esta deuda y todos sus pagos
-            asociados? Esta acción no se puede deshacer.
-          </p>
+          {deleteError ? (
+            <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2">
+              {deleteError}
+            </div>
+          ) : (
+            <p className="text-muted-foreground mt-2">
+              ¿Estás seguro de que quieres eliminar esta deuda y todos sus pagos
+              asociados? Esta acción no se puede deshacer.
+            </p>
+          )}
           <DialogFooter>
-            <Button variant="outline" onClick={() => setDeleteConfirm(null)}>
-              Cancelar
-            </Button>
             <Button
-              variant="destructive"
-              onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
+              variant="outline"
+              onClick={() => { setDeleteConfirm(null); setDeleteError(null); }}
             >
-              Eliminar
+              {deleteError ? "Cerrar" : "Cancelar"}
             </Button>
+            {!deleteError && (
+              <Button
+                variant="destructive"
+                onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
+              >
+                Eliminar
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
