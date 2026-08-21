@@ -69,6 +69,7 @@ export function TransactionsPage() {
   const [editing, setEditing] = useState<TransactionResponseDTO | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   // Filters
   const [filters, setFilters] = useState<TransactionFilters>({
@@ -89,8 +90,13 @@ export function TransactionsPage() {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
+      const apiFilters = {
+        ...filters,
+        from: filters.from ? toBackendDate(filters.from) : undefined,
+        to: filters.to ? toBackendDate(filters.to) : undefined,
+      };
       const [transactionData, categoryData] = await Promise.all([
-        transactionApi.getAll(filters),
+        transactionApi.getAll(apiFilters),
         categoryApi.getAll(),
       ]);
       setData(transactionData);
@@ -117,6 +123,7 @@ export function TransactionsPage() {
     setPrice("0");
     setTransactionType("INCOME");
     setTransactionSubtype("VARIABLE");
+    setFormError(null);
     if (categories.length > 0) setCategoryId(categories[0].id);
     setDialogOpen(true);
   };
@@ -130,12 +137,14 @@ export function TransactionsPage() {
     setTransactionType(tx.transactionType.toUpperCase());
     setTransactionSubtype(tx.transactionSubtype.toUpperCase());
     setCategoryId(tx.category.id);
+    setFormError(null);
     setDialogOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setFormError(null);
     const selectedCategory = categories.find((c) => c.id === categoryId);
     if (!selectedCategory) return;
 
@@ -157,8 +166,11 @@ export function TransactionsPage() {
       }
       setDialogOpen(false);
       await fetchData();
-    } catch (error) {
-      console.error("Error saving transaction:", error);
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setFormError(
+        axiosError.response?.data?.message || "Error al guardar la transacción"
+      );
     } finally {
       setSaving(false);
     }
@@ -168,8 +180,8 @@ export function TransactionsPage() {
     try {
       await transactionApi.delete(id);
       await fetchData();
-    } catch (error) {
-      console.error("Error deleting transaction:", error);
+    } catch {
+      // silent
     } finally {
       setDeleteConfirm(null);
     }
@@ -383,6 +395,11 @@ export function TransactionsPage() {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4 mt-4">
+            {formError && (
+              <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
+                {formError}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="tx-name">Nombre</Label>
               <Input
