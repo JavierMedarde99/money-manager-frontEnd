@@ -41,7 +41,6 @@ import {
 
 const TRANSACTION_TYPES = [
   { value: "INCOME", label: "Ingreso" },
-  { value: "EXPENSE", label: "Gasto" },
 ];
 
 const TRANSACTION_SUBTYPES = [
@@ -83,7 +82,7 @@ export function TransactionsPage() {
   const [transactionDate, setTransactionDate] = useState("");
   const [amount, setAmount] = useState("1");
   const [price, setPrice] = useState("0");
-  const [transactionType, setTransactionType] = useState("EXPENSE");
+  const [transactionType, setTransactionType] = useState("INCOME");
   const [transactionSubtype, setTransactionSubtype] = useState("VARIABLE");
   const [categoryId, setCategoryId] = useState<number>(0);
 
