@@ -5,7 +5,8 @@ React + Vite + TypeScript frontend for a personal finance manager. Connects to a
 ## Instructions
 
 Always use the correct mvp and clean code.
-For every requested change, an issue, a branch, and a PR will be created; the PR will not be merged until it is approved. Only approved branches may be merged.
+For every requested change, you must always create a brand new issue, branch, and PR; never reuse any closed ones. Do not apply changes directly. The PR will not be merged until it is approved, and only approved branches may be merged.
+
 ## Commands
 
 ```bash
