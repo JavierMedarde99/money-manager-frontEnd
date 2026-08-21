@@ -54,11 +54,11 @@ export function DashboardPage() {
 
   // Stats
   const totalIncome = transactions
-    .filter((t) => t.transactionType === "INCOME")
+    .filter((t) => t.transactionType.toUpperCase() === "INCOME")
     .reduce((sum, t) => sum + (t.price || 0), 0);
 
   const totalExpenses = transactions
-    .filter((t) => t.transactionType === "EXPENSE")
+    .filter((t) => t.transactionType.toUpperCase() === "EXPENSE")
     .reduce((sum, t) => sum + (t.price || 0), 0);
 
   const totalDebt = debts.reduce((sum, d) => sum + d.totalAmount, 0);
@@ -71,6 +71,31 @@ export function DashboardPage() {
   const recentTransactions = [...transactions]
     .sort((a, b) => b.id - a.id)
     .slice(0, 5);
+
+  // Monthly data for chart
+  const monthlyData = transactions.reduce(
+    (acc, t) => {
+      const dateParts = t.transactionDate.split("-");
+      const monthKey =
+        dateParts.length === 3 ? `${dateParts[1]}-${dateParts[2]}` : t.transactionDate.substring(0, 7);
+      if (!acc[monthKey]) acc[monthKey] = { income: 0, expense: 0 };
+      if (t.transactionType.toUpperCase() === "INCOME") {
+        acc[monthKey].income += t.price || 0;
+      } else {
+        acc[monthKey].expense += t.price || 0;
+      }
+      return acc;
+    },
+    {} as Record<string, { income: number; expense: number }>
+  );
+
+  const monthlyKeys = Object.keys(monthlyData).sort().slice(-6);
+  const maxMonthly = Math.max(
+    ...monthlyKeys.map((k) => Math.max(monthlyData[k].income, monthlyData[k].expense)),
+    1
+  );
+
+  const MONTH_NAMES = ["", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
 
   const stats = [
     {
@@ -186,7 +211,7 @@ export function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions + Monthly Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card className="shadow-primary">
           <CardHeader className="flex flex-row items-center justify-between">
@@ -232,23 +257,23 @@ export function DashboardPage() {
                     <div className="text-right">
                       <p
                         className={`text-sm font-bold ${
-                          tx.transactionType === "INCOME"
+                          tx.transactionType.toUpperCase() === "INCOME"
                             ? "text-tertiary"
                             : "text-primary"
                         }`}
                       >
-                        {tx.transactionType === "INCOME" ? "+" : "-"}
+                        {tx.transactionType.toUpperCase() === "INCOME" ? "+" : "-"}
                         {tx.price?.toFixed(2)} €
                       </p>
                       <Badge
                         variant={
-                          tx.transactionType === "INCOME"
+                          tx.transactionType.toUpperCase() === "INCOME"
                             ? "tertiary"
                             : "default"
                         }
                         className="text-[10px]"
                       >
-                        {tx.transactionType === "INCOME" ? "Ingreso" : "Gasto"}
+                        {tx.transactionType.toUpperCase() === "INCOME" ? "Ingreso" : "Gasto"}
                       </Badge>
                     </div>
                   </div>
@@ -258,9 +283,64 @@ export function DashboardPage() {
           </CardContent>
         </Card>
 
-        {/* Active Debts Summary */}
+        {/* Monthly Chart */}
         <Card className="shadow-secondary">
-          <CardHeader className="flex flex-row items-center justify-between">
+          <CardHeader>
+            <CardTitle>Ingresos vs Gastos por mes</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {monthlyKeys.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-4">
+                No hay datos para mostrar
+              </p>
+            ) : (
+              <div className="space-y-4">
+                <div className="flex items-center gap-4 text-xs">
+                  <div className="flex items-center gap-1">
+                    <div className="h-3 w-3 rounded-full bg-tertiary" />
+                    <span>Ingresos</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="h-3 w-3 rounded-full bg-primary" />
+                    <span>Gastos</span>
+                  </div>
+                </div>
+                <div className="flex items-end gap-2 h-40">
+                  {monthlyKeys.map((key) => {
+                    const [m, y] = key.split("-");
+                    const monthNum = parseInt(m, 10);
+                    const incomeH = (monthlyData[key].income / maxMonthly) * 100;
+                    const expenseH = (monthlyData[key].expense / maxMonthly) * 100;
+                    return (
+                      <div key={key} className="flex-1 flex flex-col items-center gap-1">
+                        <div className="flex items-end gap-0.5 w-full" style={{ height: "120px" }}>
+                          <div
+                            className="flex-1 rounded-t-md bg-tertiary transition-all duration-500"
+                            style={{ height: `${incomeH}%`, minHeight: incomeH > 0 ? "4px" : "0" }}
+                            title={`Ingresos: ${monthlyData[key].income.toFixed(2)} €`}
+                          />
+                          <div
+                            className="flex-1 rounded-t-md bg-primary transition-all duration-500"
+                            style={{ height: `${expenseH}%`, minHeight: expenseH > 0 ? "4px" : "0" }}
+                            title={`Gastos: ${monthlyData[key].expense.toFixed(2)} €`}
+                          />
+                        </div>
+                        <p className="text-[10px] text-muted-foreground">
+                          {MONTH_NAMES[monthNum] || m}
+                        </p>
+                        <p className="text-[9px] text-muted-foreground">{y}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+
+      {/* Active Debts Summary */}
+      <Card className="shadow-secondary">
+        <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Deudas activas</CardTitle>
             <Button
               variant="ghost"
