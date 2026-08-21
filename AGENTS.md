@@ -2,6 +2,10 @@
 
 React + Vite + TypeScript frontend for a personal finance manager. Connects to a Spring Boot backend at `http://localhost:8080`.
 
+## Instructions
+
+Always use the correct mvp and clean code.
+For every requested change, an issue, a branch, and a PR will be created; the PR will not be merged until it is approved. Only approved branches may be merged.
 ## Commands
 
 ```bash
