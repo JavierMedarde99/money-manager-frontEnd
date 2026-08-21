@@ -41,14 +41,24 @@ import {
 
 const TRANSACTION_TYPES = [
   { value: "INCOME", label: "Ingreso" },
-  { value: "EXPENSE", label: "Gasto" },
 ];
 
 const TRANSACTION_SUBTYPES = [
   { value: "FIXED", label: "Fijo" },
   { value: "VARIABLE", label: "Variable" },
-  { value: "ONE_TIME", label: "Único" },
 ];
+
+function toBackendDate(isoDate: string): string {
+  if (!isoDate) return "";
+  const [y, m, d] = isoDate.split("-");
+  return `${d}-${m}-${y}`;
+}
+
+function fromBackendDate(backendDate: string): string {
+  if (!backendDate) return "";
+  const [d, m, y] = backendDate.split("-");
+  return `${y}-${m}-${d}`;
+}
 
 export function TransactionsPage() {
   const [data, setData] = useState<PageTransactionResponseDTO | null>(null);
@@ -69,8 +79,8 @@ export function TransactionsPage() {
   // Form
   const [name, setName] = useState("");
   const [transactionDate, setTransactionDate] = useState("");
-  const [amount, setAmount] = useState<number>(1);
-  const [price, setPrice] = useState<number>(0);
+  const [amount, setAmount] = useState("1");
+  const [price, setPrice] = useState("0");
   const [transactionType, setTransactionType] = useState("EXPENSE");
   const [transactionSubtype, setTransactionSubtype] = useState("VARIABLE");
   const [categoryId, setCategoryId] = useState<number>(0);
@@ -102,9 +112,9 @@ export function TransactionsPage() {
     setEditing(null);
     setName("");
     setTransactionDate(new Date().toISOString().split("T")[0]);
-    setAmount(1);
-    setPrice(0);
-    setTransactionType("EXPENSE");
+    setAmount("1");
+    setPrice("0");
+    setTransactionType("INCOME");
     setTransactionSubtype("VARIABLE");
     if (categories.length > 0) setCategoryId(categories[0].id);
     setDialogOpen(true);
@@ -113,11 +123,11 @@ export function TransactionsPage() {
   const openEdit = (tx: TransactionResponseDTO) => {
     setEditing(tx);
     setName(tx.name);
-    setTransactionDate(tx.transactionDate);
-    setAmount(tx.amount || 1);
-    setPrice(tx.price || 0);
-    setTransactionType(tx.transactionType);
-    setTransactionSubtype(tx.transactionSubtype);
+    setTransactionDate(fromBackendDate(tx.transactionDate));
+    setAmount(String(tx.amount || 1));
+    setPrice(String(tx.price || 0));
+    setTransactionType(tx.transactionType.toUpperCase());
+    setTransactionSubtype(tx.transactionSubtype.toUpperCase());
     setCategoryId(tx.category.id);
     setDialogOpen(true);
   };
@@ -130,9 +140,9 @@ export function TransactionsPage() {
 
     const payload: TransactionRequestDTO = {
       name,
-      transactionDate,
-      amount,
-      price,
+      transactionDate: toBackendDate(transactionDate),
+      amount: parseInt(amount, 10) || 0,
+      price: parseFloat(price) || 0,
       transactionType,
       transactionSubtype,
       category: selectedCategory,
@@ -299,19 +309,17 @@ export function TransactionsPage() {
                   <TableCell>
                     <Badge
                       variant={
-                        tx.transactionType === "INCOME" ? "tertiary" : "default"
+                        tx.transactionType.toUpperCase() === "INCOME" ? "tertiary" : "default"
                       }
                     >
-                      {tx.transactionType === "INCOME" ? "Ingreso" : "Gasto"}
+                      {tx.transactionType.toUpperCase() === "INCOME" ? "Ingreso" : "Gasto"}
                     </Badge>
                   </TableCell>
                   <TableCell>
                     <Badge variant="secondary">
-                      {tx.transactionSubtype === "FIXED"
+                      {tx.transactionSubtype.toUpperCase() === "FIXED"
                         ? "Fijo"
-                        : tx.transactionSubtype === "VARIABLE"
-                        ? "Variable"
-                        : "Único"}
+                        : "Variable"}
                     </Badge>
                   </TableCell>
                   <TableCell>
@@ -434,9 +442,9 @@ export function TransactionsPage() {
                 <Input
                   id="tx-amount"
                   type="number"
-                  min="1"
+                  min="0"
                   value={amount}
-                  onChange={(e) => setAmount(Number(e.target.value))}
+                  onChange={(e) => setAmount(e.target.value)}
                   required
                 />
               </div>
@@ -448,7 +456,7 @@ export function TransactionsPage() {
                   min="0"
                   step="0.01"
                   value={price}
-                  onChange={(e) => setPrice(Number(e.target.value))}
+                  onChange={(e) => setPrice(e.target.value)}
                   required
                 />
               </div>
