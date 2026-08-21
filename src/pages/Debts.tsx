@@ -40,6 +40,18 @@ import {
   Banknote,
 } from "lucide-react";
 
+function toBackendDate(isoDate: string): string {
+  if (!isoDate) return "";
+  const [y, m, d] = isoDate.split("-");
+  return `${d}-${m}-${y}`;
+}
+
+function fromBackendDate(backendDate: string): string {
+  if (!backendDate) return "";
+  const [d, m, y] = backendDate.split("-");
+  return `${y}-${m}-${d}`;
+}
+
 export function DebtsPage() {
   const [debts, setDebts] = useState<DebtResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -90,8 +102,8 @@ export function DebtsPage() {
     setEditing(debt);
     setName(debt.name);
     setTotalAmount(debt.totalAmount);
-    setStarDate(debt.starDate);
-    setEndDate(debt.endDate || "");
+    setStarDate(fromBackendDate(debt.starDate));
+    setEndDate(debt.endDate ? fromBackendDate(debt.endDate) : "");
     setDialogOpen(true);
   };
 
@@ -102,8 +114,8 @@ export function DebtsPage() {
     const payload: DebtRequestDTO = {
       name,
       totalAmount,
-      starDate,
-      endDate: endDate || undefined,
+      starDate: toBackendDate(starDate),
+      endDate: endDate ? toBackendDate(endDate) : undefined,
     };
 
     try {
@@ -146,7 +158,7 @@ export function DebtsPage() {
     setSavingPayment(true);
 
     const payload: PaymentRequestDTO = {
-      paymentDate,
+      paymentDate: toBackendDate(paymentDate),
       amount: paymentAmount,
       debt: paymentDebt,
     };
