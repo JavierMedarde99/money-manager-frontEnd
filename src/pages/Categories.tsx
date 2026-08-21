@@ -31,6 +31,7 @@ export function CategoriesPage() {
   const [color, setColor] = useState("#e040a0");
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const fetchCategories = async () => {
     try {
@@ -81,11 +82,15 @@ export function CategoriesPage() {
   };
 
   const handleDelete = async (id: number) => {
+    setDeleteError(null);
     try {
       await categoryApi.delete(id);
       await fetchCategories();
-    } catch (error) {
-      console.error("Error deleting category:", error);
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const message =
+        axiosError.response?.data?.message || "No se puede eliminar la categoría porque tiene transacciones asociadas.";
+      setDeleteError(message);
     } finally {
       setDeleteConfirm(null);
     }
@@ -223,29 +228,37 @@ export function CategoriesPage() {
       {/* Delete Confirmation Dialog */}
       <Dialog
         open={deleteConfirm !== null}
-        onOpenChange={() => setDeleteConfirm(null)}
+        onOpenChange={() => { setDeleteConfirm(null); setDeleteError(null); }}
       >
-        <DialogContent onClose={() => setDeleteConfirm(null)}>
+        <DialogContent onClose={() => { setDeleteConfirm(null); setDeleteError(null); }}>
           <DialogHeader>
             <DialogTitle>Eliminar Categoría</DialogTitle>
           </DialogHeader>
-          <p className="text-muted-foreground mt-2">
-            ¿Estás seguro de que quieres eliminar esta categoría? Esta acción no
-            se puede deshacer.
-          </p>
+          {deleteError ? (
+            <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2">
+              {deleteError}
+            </div>
+          ) : (
+            <p className="text-muted-foreground mt-2">
+              ¿Estás seguro de que quieres eliminar esta categoría? Esta acción no
+              se puede deshacer.
+            </p>
+          )}
           <DialogFooter>
             <Button
               variant="outline"
-              onClick={() => setDeleteConfirm(null)}
+              onClick={() => { setDeleteConfirm(null); setDeleteError(null); }}
             >
-              Cancelar
+              {deleteError ? "Cerrar" : "Cancelar"}
             </Button>
-            <Button
-              variant="destructive"
-              onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
-            >
-              Eliminar
-            </Button>
+            {!deleteError && (
+              <Button
+                variant="destructive"
+                onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
+              >
+                Eliminar
+              </Button>
+            )}
           </DialogFooter>
         </DialogContent>
       </Dialog>
