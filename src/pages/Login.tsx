@@ -6,15 +6,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
 import { DollarSign, Loader2 } from "lucide-react";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  username: z.string().min(3, "Mínimo 3 caracteres").max(50),
+  password: z.string().min(1, "La contraseña es obligatoria"),
+});
 
 export function LoginPage() {
   const navigate = useNavigate();
   const { login, isLoading, error, clearError } = useAuthStore();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldErrors({});
+    const result = loginSchema.safeParse({ username, password });
+    if (!result.success) {
+      const errors: { username?: string; password?: string } = {};
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as "username" | "password";
+        errors[field] = issue.message;
+      }
+      setFieldErrors(errors);
+      return;
+    }
     try {
       await login({ username, password });
       navigate("/");
@@ -61,6 +79,9 @@ export function LoginPage() {
                   onChange={(e) => setUsername(e.target.value)}
                   required
                 />
+                {fieldErrors.username && (
+                  <p className="text-xs text-red-500">{fieldErrors.username}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Contraseña</Label>
@@ -72,6 +93,9 @@ export function LoginPage() {
                   onChange={(e) => setPassword(e.target.value)}
                   required
                 />
+                {fieldErrors.password && (
+                  <p className="text-xs text-red-500">{fieldErrors.password}</p>
+                )}
               </div>
             </CardContent>
             <CardFooter className="flex flex-col gap-4">
