@@ -41,6 +41,7 @@ import {
 
 const TRANSACTION_TYPES = [
   { value: "INCOME", label: "Ingreso" },
+  { value: "EXPENSE", label: "Gasto" },
 ];
 
 const TRANSACTION_SUBTYPES = [
