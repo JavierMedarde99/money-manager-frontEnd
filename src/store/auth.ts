@@ -7,6 +7,7 @@ interface AuthState {
   user: UserResponseDto | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  initializing: boolean;
   error: string | null;
   login: (data: LoginRequestDTO) => Promise<void>;
   register: (data: UserRequestDTO) => Promise<void>;
@@ -14,6 +15,8 @@ interface AuthState {
   fetchProfile: () => Promise<void>;
   clearError: () => void;
 }
+
+const hasToken = !!localStorage.getItem("token");
 
 export const useAuthStore = create<AuthState>((set) => ({
   token: localStorage.getItem("token"),
@@ -25,8 +28,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       return null;
     }
   })(),
-  isAuthenticated: !!localStorage.getItem("token"),
+  isAuthenticated: hasToken,
   isLoading: false,
+  initializing: hasToken,
   error: null,
 
   login: async (data: LoginRequestDTO) => {
@@ -76,11 +80,11 @@ export const useAuthStore = create<AuthState>((set) => ({
     try {
       const profile = await userApi.getProfile();
       localStorage.setItem("user", JSON.stringify(profile));
-      set({ user: profile });
+      set({ user: profile, initializing: false });
     } catch {
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      set({ token: null, user: null, isAuthenticated: false });
+      set({ token: null, user: null, isAuthenticated: false, initializing: false });
     }
   },
 

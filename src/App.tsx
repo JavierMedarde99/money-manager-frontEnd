@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
 import { MainLayout } from "@/components/layout/MainLayout";
@@ -7,8 +8,17 @@ import { CategoriesPage } from "@/pages/Categories";
 import { TransactionsPage } from "@/pages/Transactions";
 import { DebtsPage } from "@/pages/Debts";
 import { DashboardPage } from "@/pages/Dashboard";
+import { useAuthStore } from "@/store/auth";
 
 function App() {
+  const fetchProfile = useAuthStore((s) => s.fetchProfile);
+  const token = useAuthStore((s) => s.token);
+
+  useEffect(() => {
+    if (token) {
+      fetchProfile();
+    }
+  }, [token, fetchProfile]);
   return (
     <BrowserRouter>
       <Routes>
