@@ -100,19 +100,22 @@ export function TransactionsPage() {
       ]);
       setData(transactionData);
       setCategories(categoryData);
-      if (categoryId === 0 && categoryData.length > 0) {
-        setCategoryId(categoryData[0].id);
-      }
     } catch (error) {
       console.error("Error fetching data:", error);
     } finally {
       setLoading(false);
     }
-  }, [filters, categoryId]);
+  }, [filters]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  useEffect(() => {
+    if (categoryId === 0 && categories.length > 0) {
+      setCategoryId(categories[0].id);
+    }
+  }, [categoryId, categories]);
 
   const openCreate = () => {
     setEditing(null);
