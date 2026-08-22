@@ -49,11 +49,7 @@ const TRANSACTION_SUBTYPES = [
   { value: "VARIABLE", label: "Variable" },
 ];
 
-function toBackendDate(isoDate: string): string {
-  if (!isoDate) return "";
-  const [y, m, d] = isoDate.split("-");
-  return `${d}-${m}-${y}`;
-}
+import { toBackendDate } from "@/lib/dateUtils";
 
 export function TransactionsPage() {
   const [data, setData] = useState<PageTransactionResponseDTO | null>(null);
