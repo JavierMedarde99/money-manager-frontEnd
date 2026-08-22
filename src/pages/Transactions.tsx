@@ -75,8 +75,8 @@ export function TransactionsPage() {
   // Form
   const [name, setName] = useState("");
   const [transactionDate, setTransactionDate] = useState("");
-  const [amount, setAmount] = useState("1");
-  const [price, setPrice] = useState("0");
+  const [amount, setAmount] = useState<number>(1);
+  const [price, setPrice] = useState<number>(0);
   const [transactionType, setTransactionType] = useState("INCOME");
   const [transactionSubtype, setTransactionSubtype] = useState("VARIABLE");
   const [categoryId, setCategoryId] = useState<number>(0);
@@ -116,8 +116,8 @@ export function TransactionsPage() {
     setEditing(null);
     setName("");
     setTransactionDate(new Date().toISOString().split("T")[0]);
-    setAmount("1");
-    setPrice("0");
+    setAmount(1);
+    setPrice(0);
     setTransactionType("INCOME");
     setTransactionSubtype("VARIABLE");
     setFormError(null);
@@ -129,8 +129,8 @@ export function TransactionsPage() {
     setEditing(tx);
     setName(tx.name);
     setTransactionDate(tx.transactionDate);
-    setAmount(String(tx.amount || 1));
-    setPrice(String(tx.price || 0));
+    setAmount(tx.amount || 1);
+    setPrice(tx.price || 0);
     setTransactionType(tx.transactionType.toUpperCase());
     setTransactionSubtype(tx.transactionSubtype.toUpperCase());
     setCategoryId(tx.category.id);
@@ -148,8 +148,8 @@ export function TransactionsPage() {
     const payload: TransactionRequestDTO = {
       name,
       transactionDate,
-      amount: parseInt(amount, 10) || 0,
-      price: parseFloat(price) || 0,
+      amount,
+      price,
       transactionType,
       transactionSubtype,
       category: selectedCategory,
@@ -459,7 +459,7 @@ export function TransactionsPage() {
                   type="number"
                   min="0"
                   value={amount}
-                  onChange={(e) => setAmount(e.target.value)}
+                  onChange={(e) => setAmount(Number(e.target.value) || 0)}
                   required
                 />
               </div>
@@ -471,7 +471,7 @@ export function TransactionsPage() {
                   min="0"
                   step="0.01"
                   value={price}
-                  onChange={(e) => setPrice(e.target.value)}
+                  onChange={(e) => setPrice(Number(e.target.value) || 0)}
                   required
                 />
               </div>
