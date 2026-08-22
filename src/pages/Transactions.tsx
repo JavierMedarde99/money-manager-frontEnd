@@ -49,8 +49,6 @@ const TRANSACTION_SUBTYPES = [
   { value: "VARIABLE", label: "Variable" },
 ];
 
-import { toBackendDate } from "@/lib/dateUtils";
-
 export function TransactionsPage() {
   const [data, setData] = useState<PageTransactionResponseDTO | null>(null);
   const [categories, setCategories] = useState<CategoryResponseDTO[]>([]);
@@ -82,8 +80,6 @@ export function TransactionsPage() {
     try {
       const apiFilters = {
         ...filters,
-        from: filters.from ? toBackendDate(filters.from) : undefined,
-        to: filters.to ? toBackendDate(filters.to) : undefined,
       };
       const [transactionData, categoryData] = await Promise.all([
         transactionApi.getAll(apiFilters),
