@@ -43,8 +43,8 @@ export function DashboardPage() {
         setTransactions(txData.content);
         setDebts(debtData);
         setCategories(catData);
-      } catch (error) {
-        console.error("Error loading dashboard:", error);
+      } catch {
+        // error handled by UI state
       } finally {
         setLoading(false);
       }

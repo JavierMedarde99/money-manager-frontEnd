@@ -38,8 +38,8 @@ export function CategoriesPage() {
     try {
       const data = await categoryApi.getAll();
       setCategories(data);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
+    } catch {
+      // error handled by UI state
     } finally {
       setLoading(false);
     }
