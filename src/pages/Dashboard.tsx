@@ -76,8 +76,7 @@ export function DashboardPage() {
   const monthlyData = transactions.reduce(
     (acc, t) => {
       const dateParts = t.transactionDate.split("-");
-      const monthKey =
-        dateParts.length === 3 ? `${dateParts[1]}-${dateParts[2]}` : t.transactionDate.substring(0, 7);
+      const monthKey = dateParts.length === 3 ? `${dateParts[1]}-${dateParts[0]}` : t.transactionDate.substring(0, 7);
       if (!acc[monthKey]) acc[monthKey] = { income: 0, expense: 0 };
       if (t.transactionType.toUpperCase() === "INCOME") {
         acc[monthKey].income += t.price || 0;
