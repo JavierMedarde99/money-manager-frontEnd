@@ -54,12 +54,6 @@ function toBackendDate(isoDate: string): string {
   return `${d}-${m}-${y}`;
 }
 
-function fromBackendDate(backendDate: string): string {
-  if (!backendDate) return "";
-  const [d, m, y] = backendDate.split("-");
-  return `${y}-${m}-${d}`;
-}
-
 export function TransactionsPage() {
   const [data, setData] = useState<PageTransactionResponseDTO | null>(null);
   const [categories, setCategories] = useState<CategoryResponseDTO[]>([]);
@@ -133,7 +127,7 @@ export function TransactionsPage() {
   const openEdit = (tx: TransactionResponseDTO) => {
     setEditing(tx);
     setName(tx.name);
-    setTransactionDate(fromBackendDate(tx.transactionDate));
+    setTransactionDate(tx.transactionDate);
     setAmount(String(tx.amount || 1));
     setPrice(String(tx.price || 0));
     setTransactionType(tx.transactionType.toUpperCase());
@@ -152,7 +146,7 @@ export function TransactionsPage() {
 
     const payload: TransactionRequestDTO = {
       name,
-      transactionDate: toBackendDate(transactionDate),
+      transactionDate,
       amount: parseInt(amount, 10) || 0,
       price: parseFloat(price) || 0,
       transactionType,
