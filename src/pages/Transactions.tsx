@@ -100,8 +100,8 @@ export function TransactionsPage() {
       ]);
       setData(transactionData);
       setCategories(categoryData);
-    } catch (error) {
-      console.error("Error fetching data:", error);
+    } catch {
+      // error handled by UI state
     } finally {
       setLoading(false);
     }

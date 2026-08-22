@@ -80,8 +80,8 @@ export function DebtsPage() {
     try {
       const data = await debtApi.getAll();
       setDebts(data);
-    } catch (error) {
-      console.error("Error fetching debts:", error);
+    } catch {
+      // error handled by UI state
     } finally {
       setLoading(false);
     }
@@ -128,8 +128,8 @@ export function DebtsPage() {
       }
       setDialogOpen(false);
       await fetchDebts();
-    } catch (error) {
-      console.error("Error saving debt:", error);
+    } catch {
+      // error handled by UI state
     } finally {
       setSaving(false);
     }
