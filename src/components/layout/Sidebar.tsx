@@ -140,7 +140,7 @@ export function Sidebar() {
 
       {/* Desktop sidebar */}
       <aside
-        className={`hidden lg:flex flex-col h-screen bg-card border-r border-border transition-all duration-300 ${
+        className={`hidden lg:flex flex-col fixed top-0 left-0 h-screen bg-card border-r border-border transition-all duration-300 z-40 ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
