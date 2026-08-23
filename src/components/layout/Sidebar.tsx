@@ -13,6 +13,7 @@ import {
   Menu,
   X,
   DollarSign,
+  User,
 } from "lucide-react";
 
 const navItems = [
@@ -79,15 +80,23 @@ export function Sidebar() {
 
       {/* User section */}
       <div className={`p-4 flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
-        <Avatar className="h-9 w-9 shrink-0">
-          <AvatarFallback className="text-xs">{initials}</AvatarFallback>
-        </Avatar>
-        {!collapsed && (
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-bold truncate">{user?.username}</p>
-            <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
-          </div>
-        )}
+        <button
+          onClick={() => { navigate("/profile"); setMobileOpen(false); }}
+          className={`flex items-center gap-3 ${collapsed ? "justify-center" : "flex-1 min-w-0"} group`}
+        >
+          <Avatar className="h-9 w-9 shrink-0">
+            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+          </Avatar>
+          {!collapsed && (
+            <div className="flex-1 min-w-0 text-left">
+              <p className="text-sm font-bold truncate group-hover:text-primary transition-colors">{user?.username}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+            </div>
+          )}
+          {!collapsed && (
+            <User className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+          )}
+        </button>
         {!collapsed && (
           <Button
             variant="ghost"
