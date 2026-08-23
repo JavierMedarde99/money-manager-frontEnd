@@ -290,7 +290,8 @@ export function TransactionsPage() {
         </div>
       ) : (
         <>
-          <Table>
+          <div className="overflow-x-auto">
+            <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
                 <TableHead>Nombre</TableHead>
@@ -359,7 +360,8 @@ export function TransactionsPage() {
                 </TableRow>
               ))}
             </TableBody>
-          </Table>
+            </Table>
+          </div>
 
           <Pagination
             currentPage={data.page + 1}

@@ -113,7 +113,7 @@ export function CategoriesPage() {
 
   return (
     <div className="animate-bounce-in space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-3xl font-bold text-card-foreground">
             Categorías
@@ -135,7 +135,8 @@ export function CategoriesPage() {
           <p className="text-sm">Crea tu primera categoría para empezar</p>
         </div>
       ) : (
-        <Table>
+        <div className="overflow-x-auto">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Color</TableHead>
@@ -175,7 +176,8 @@ export function CategoriesPage() {
               </TableRow>
             ))}
           </TableBody>
-        </Table>
+          </Table>
+        </div>
       )}
 
       {/* Create/Edit Dialog */}

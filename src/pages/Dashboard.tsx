@@ -214,7 +214,7 @@ export function DashboardPage() {
         <h1 className="text-3xl font-bold text-card-foreground">
           Hola, {user?.username || "Usuario"} 👋
         </h1>
-        <div className="flex items-center gap-3 mt-2">
+        <div className="flex items-center gap-2 sm:gap-3 mt-2 flex-wrap justify-center">
           <Button
             variant="ghost"
             size="icon"
@@ -223,7 +223,7 @@ export function DashboardPage() {
           >
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <p className="text-muted-foreground font-medium min-w-[180px] text-center">
+          <p className="text-muted-foreground font-medium min-w-0 sm:min-w-[180px] text-center">
             Resumen de {selectedMonthName} {selectedYear}
           </p>
           <Button
