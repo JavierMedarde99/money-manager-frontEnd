@@ -116,7 +116,7 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
-        className="fixed top-4 left-4 z-50 lg:hidden h-10 w-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center"
+        className="fixed top-4 left-4 z-[60] lg:hidden h-10 w-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center"
       >
         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
       </button>
@@ -124,14 +124,14 @@ export function Sidebar() {
       {/* Mobile overlay */}
       {mobileOpen && (
         <div
-          className="fixed inset-0 bg-black/30 z-30 lg:hidden"
+          className="fixed inset-0 bg-black/30 z-[55] lg:hidden"
           onClick={() => setMobileOpen(false)}
         />
       )}
 
       {/* Mobile sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-40 h-full w-64 bg-card border-r border-border transition-transform duration-300 lg:hidden ${
+        className={`fixed top-0 left-0 z-[60] h-full w-64 bg-card border-r border-border transition-transform duration-300 lg:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -140,7 +140,7 @@ export function Sidebar() {
 
       {/* Desktop sidebar */}
       <aside
-        className={`hidden lg:flex flex-col fixed top-0 left-0 h-screen bg-card border-r border-border transition-all duration-300 z-40 ${
+        className={`hidden lg:flex flex-col fixed top-0 left-0 h-screen bg-card border-r border-border transition-all duration-300 z-[60] ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
