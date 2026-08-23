@@ -55,7 +55,7 @@ export function Sidebar() {
       <Separator className="mx-4" />
 
       {/* Nav */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -79,7 +79,7 @@ export function Sidebar() {
       <Separator className="mx-4" />
 
       {/* User section */}
-      <div className={`p-4 flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
+      <div className={`p-4 flex items-center gap-3 sticky bottom-0 bg-card z-10 ${collapsed ? "justify-center" : ""}`}>
         <button
           onClick={() => { navigate("/profile"); setMobileOpen(false); }}
           className={`flex items-center gap-3 ${collapsed ? "justify-center" : "flex-1 min-w-0"} group`}
