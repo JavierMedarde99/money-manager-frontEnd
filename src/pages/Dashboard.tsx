@@ -22,6 +22,8 @@ import {
   ArrowUpRight,
   ArrowDownRight,
   Plus,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import {
   Tooltip,
@@ -45,11 +47,14 @@ export function DashboardPage() {
   const [debts, setDebts] = useState<DebtResponseDTO[]>([]);
   const [categories, setCategories] = useState<CategoryResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
-
   const now = new Date();
-  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+
+  const monthStr = String(selectedMonth + 1).padStart(2, "0");
+  const currentMonth = `${selectedYear}-${monthStr}`;
   const monthFirstDay = `${currentMonth}-01`;
-  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const lastDay = new Date(selectedYear, selectedMonth + 1, 0).getDate();
   const monthLastDay = `${currentMonth}-${String(lastDay).padStart(2, "0")}`;
 
   useEffect(() => {
@@ -133,7 +138,31 @@ export function DashboardPage() {
   );
 
   const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
-  const currentMonthName = MONTH_NAMES[now.getMonth()];
+  const selectedMonthName = MONTH_NAMES[selectedMonth];
+  const isCurrentMonth = selectedMonth === now.getMonth() && selectedYear === now.getFullYear();
+
+  const goToPrevMonth = () => {
+    if (selectedMonth === 0) {
+      setSelectedMonth(11);
+      setSelectedYear((y: number) => y - 1);
+    } else {
+      setSelectedMonth((m: number) => m - 1);
+    }
+  };
+
+  const goToNextMonth = () => {
+    if (selectedMonth === 11) {
+      setSelectedMonth(0);
+      setSelectedYear((y: number) => y + 1);
+    } else {
+      setSelectedMonth((m: number) => m + 1);
+    }
+  };
+
+  const goToCurrentMonth = () => {
+    setSelectedMonth(now.getMonth());
+    setSelectedYear(now.getFullYear());
+  };
 
   const stats = [
     {
@@ -185,9 +214,37 @@ export function DashboardPage() {
         <h1 className="text-3xl font-bold text-card-foreground">
           Hola, {user?.username || "Usuario"} 👋
         </h1>
-        <p className="text-muted-foreground">
-          Resumen de {currentMonthName} {now.getFullYear()}
-        </p>
+        <div className="flex items-center gap-3 mt-2">
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={goToPrevMonth}
+            className="h-8 w-8 rounded-full"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </Button>
+          <p className="text-muted-foreground font-medium min-w-[180px] text-center">
+            Resumen de {selectedMonthName} {selectedYear}
+          </p>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={goToNextMonth}
+            className="h-8 w-8 rounded-full"
+          >
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+          {!isCurrentMonth && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={goToCurrentMonth}
+              className="rounded-full text-xs"
+            >
+              Hoy
+            </Button>
+          )}
+        </div>
       </div>
 
       {/* Stats Grid */}
