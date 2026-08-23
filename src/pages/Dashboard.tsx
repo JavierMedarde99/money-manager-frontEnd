@@ -211,9 +211,6 @@ export function DashboardPage() {
     <div className="animate-bounce-in space-y-8">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-card-foreground">
-          Hola, {user?.username || "Usuario"} 👋
-        </h1>
         <div className="flex items-center gap-2 sm:gap-3 mt-2 flex-wrap justify-center">
           <Button
             variant="ghost"
