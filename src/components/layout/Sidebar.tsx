@@ -39,7 +39,7 @@ export function Sidebar() {
     : "U";
 
   const sidebarContent = (
-    <div className="flex flex-col h-full overflow-y-auto">
+    <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 p-5">
         <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center shadow-primary shrink-0">
