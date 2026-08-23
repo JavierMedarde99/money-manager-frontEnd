@@ -10,7 +10,6 @@ import type {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useAuthStore } from "@/store/auth";
 import { useNavigate } from "react-router-dom";
 import {
   ArrowRightLeft,
@@ -41,7 +40,6 @@ interface PieData {
 }
 
 export function DashboardPage() {
-  const { user } = useAuthStore();
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<TransactionResponseDTO[]>([]);
   const [debts, setDebts] = useState<DebtResponseDTO[]>([]);
