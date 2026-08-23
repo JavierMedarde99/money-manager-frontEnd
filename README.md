@@ -2,13 +2,16 @@
 
 Frontend de aplicación de gestión de finanzas personales. React + Vite + TypeScript, conecta con un backend Spring Boot.
 
+**Deploy**: https://money-manager-front-end-weld.vercel.app/
+
 ## Funcionalidades
 
-- **Dashboard**: Resumen financiero con ingresos/gastos totales, balance neto, deuda restante, transacciones recientes y gráfico mensual de ingresos vs gastos.
+- **Dashboard**: Resumen financiero con ingresos/gastos totales, balance neto, deuda restante, gráficos de pie por categoría (recharts), selector de mes para navegar entre meses, y transacciones recientes.
 - **Transacciones**: CRUD completo con tabla paginada, filtros por tipo/subtipo/fecha, y formulario con validación. Soporta tipos INCOME/EXPENSE y subtipos FIXED/VARIABLE.
 - **Categorías**: CRUD completo con selector de color. Validación de nombre y color.
 - **Deudas**: CRUD completo con progreso de pago visual (barra + porcentaje), sistema de pagos vinculados, y fechas de inicio/fin.
-- **Autenticación**: Login y registro con validación (Zod), JWT Bearer token, persistencia en localStorage, y auto-logout en 401.
+- **Perfil de usuario**: Ver perfil, editar información (usuario, email, contraseña), y eliminar cuenta con confirmación.
+- **Autenticación**: Login y registro con validación (Zod), JWT Bearer token, persistencia en localStorage, auto-logout en 401, y ErrorBoundary para errores de render.
 
 ## Stack
 
@@ -22,6 +25,7 @@ Frontend de aplicación de gestión de finanzas personales. React + Vite + TypeS
 | HTTP | Axios |
 | Validación | Zod |
 | Router | React Router DOM 7 |
+| Gráficos | Recharts |
 | Iconos | Lucide React |
 | Linting | Oxlint |
 
@@ -50,10 +54,10 @@ src/
   components/
     ui/          # Componentes UI reutilizables (button, card, dialog, input, select, table, etc.)
     layout/      # Sidebar, MainLayout, ProtectedRoute
-    data-table/  # Componente de tabla de datos genérico
-  pages/         # Una página por ruta: Login, Register, Dashboard, Transactions, Categories, Debts
+    ErrorBoundary.tsx  # Componente de captura de errores de render
+  pages/         # Una página por ruta: Login, Register, Dashboard, Transactions, Categories, Debts, Profile
   types/         # Interfaces TypeScript que espejan los DTOs del backend
-  lib/           # Utilidades (cn(), dateUtils)
+  lib/           # Utilidades (cn())
 ```
 
 ## Rutas
@@ -66,6 +70,7 @@ src/
 | `/transactions` | Gestión de transacciones | Sí |
 | `/categories` | Gestión de categorías | Sí |
 | `/debts` | Gestión de deudas y pagos | Sí |
+| `/profile` | Perfil de usuario (ver, editar, eliminar) | Sí |
 
 ## Backend API
 
@@ -74,6 +79,11 @@ El backend está desplegado en `https://expense-manager-new.onrender.com`. Docum
 La URL se configura por variables de entorno:
 - **Desarrollo** (`.env`): `http://localhost:8080`
 - **Producción** (`.env.production`): `https://expense-manager-new.onrender.com`
+
+## Despliegue
+
+- **Frontend**: Vercel (`https://money-manager-front-end-weld.vercel.app/`)
+- **Backend**: Render (`https://expense-manager-new.onrender.com`)
 
 ## Diseño
 
