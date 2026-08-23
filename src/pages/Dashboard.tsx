@@ -23,6 +23,30 @@ import {
   ArrowDownRight,
   Plus,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
+
+interface CategoryData {
+  name: string;
+  total: number;
+  color: string;
+}
+
+interface PieData {
+  name: string;
+  value: number;
+  color: string;
+}
 
 export function DashboardPage() {
   const { user } = useAuthStore();
@@ -52,7 +76,6 @@ export function DashboardPage() {
     load();
   }, []);
 
-  // Stats
   const totalIncome = transactions
     .filter((t) => t.transactionType.toUpperCase() === "INCOME")
     .reduce((sum, t) => sum + (t.price || 0), 0);
@@ -72,29 +95,48 @@ export function DashboardPage() {
     .sort((a, b) => b.id - a.id)
     .slice(0, 5);
 
-  // Monthly data for chart
-  const monthlyData = transactions.reduce(
-    (acc, t) => {
-      const dateParts = t.transactionDate.split("-");
-      const monthKey = dateParts.length === 3 ? `${dateParts[1]}-${dateParts[0]}` : t.transactionDate.substring(0, 7);
-      if (!acc[monthKey]) acc[monthKey] = { income: 0, expense: 0 };
-      if (t.transactionType.toUpperCase() === "INCOME") {
-        acc[monthKey].income += t.price || 0;
-      } else {
-        acc[monthKey].expense += t.price || 0;
-      }
-      return acc;
-    },
-    {} as Record<string, { income: number; expense: number }>
+  const incomeData: CategoryData[] = Object.values(
+    transactions
+      .filter((t) => t.transactionType.toUpperCase() === "INCOME")
+      .reduce(
+        (acc, t) => {
+          const key = t.category.name;
+          if (!acc[key])
+            acc[key] = { name: key, total: 0, color: t.category.color };
+          acc[key].total += t.price || 0;
+          return acc;
+        },
+        {} as Record<string, CategoryData>
+      )
   );
 
-  const monthlyKeys = Object.keys(monthlyData).sort().slice(-6);
-  const maxMonthly = Math.max(
-    ...monthlyKeys.map((k) => Math.max(monthlyData[k].income, monthlyData[k].expense)),
-    1
+  const expensesData: CategoryData[] = Object.values(
+    transactions
+      .filter((t) => t.transactionType.toUpperCase() === "EXPENSE")
+      .reduce(
+        (acc, t) => {
+          const key = t.category.name;
+          if (!acc[key])
+            acc[key] = { name: key, total: 0, color: t.category.color };
+          acc[key].total += t.price || 0;
+          return acc;
+        },
+        {} as Record<string, CategoryData>
+      )
   );
 
-  const MONTH_NAMES = ["", "Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+  const pieData: PieData[] = Object.values(
+    transactions.reduce(
+      (acc, t) => {
+        const key = t.category.name;
+        if (!acc[key])
+          acc[key] = { name: key, value: 0, color: t.category.color };
+        acc[key].value += Math.abs(t.price || 0);
+        return acc;
+      },
+      {} as Record<string, PieData>
+    )
+  );
 
   const stats = [
     {
@@ -210,133 +252,228 @@ export function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Recent Transactions + Monthly Chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="shadow-primary">
-          <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle>Transacciones recientes</CardTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => navigate("/transactions")}
-            >
-              Ver todas
-              <ArrowRightLeft className="h-4 w-4" />
-            </Button>
-          </CardHeader>
-          <CardContent>
-            {recentTransactions.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No hay transacciones recientes
-              </p>
-            ) : (
-              <div className="space-y-3">
-                {recentTransactions.map((tx) => (
-                  <div
-                    key={tx.id}
-                    className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
-                  >
-                    <div className="flex items-center gap-3">
+      {/* Recent Transactions - Full Width */}
+      <Card className="shadow-primary">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Transacciones recientes</CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/transactions")}
+          >
+            Ver todas
+            <ArrowRightLeft className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {recentTransactions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No hay transacciones recientes
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {recentTransactions.map((tx) => (
+                <div
+                  key={tx.id}
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-8 w-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: tx.category.color + "20" }}
+                    >
                       <div
-                        className="h-8 w-8 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: tx.category.color + "20" }}
-                      >
-                        <div
-                          className="h-3 w-3 rounded-full"
-                          style={{ backgroundColor: tx.category.color }}
-                        />
-                      </div>
-                      <div>
-                        <p className="text-sm font-semibold">{tx.name}</p>
-                        <p className="text-xs text-muted-foreground">
-                          {tx.transactionDate}
-                        </p>
-                      </div>
+                        className="h-3 w-3 rounded-full"
+                        style={{ backgroundColor: tx.category.color }}
+                      />
                     </div>
-                    <div className="text-right">
-                      <p
-                        className={`text-sm font-bold ${
-                          tx.transactionType.toUpperCase() === "INCOME"
-                            ? "text-tertiary"
-                            : "text-primary"
-                        }`}
-                      >
-                        {tx.transactionType.toUpperCase() === "INCOME" ? "+" : "-"}
-                        {tx.price?.toFixed(2)} €
+                    <div>
+                      <p className="text-sm font-semibold">{tx.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {tx.transactionDate}
                       </p>
-                      <Badge
-                        variant={
-                          tx.transactionType.toUpperCase() === "INCOME"
-                            ? "tertiary"
-                            : "default"
-                        }
-                        className="text-[10px]"
-                      >
-                        {tx.transactionType.toUpperCase() === "INCOME" ? "Ingreso" : "Gasto"}
-                      </Badge>
                     </div>
                   </div>
-                ))}
-              </div>
+                  <div className="text-right">
+                    <p
+                      className={`text-sm font-bold ${
+                        tx.transactionType.toUpperCase() === "INCOME"
+                          ? "text-tertiary"
+                          : "text-primary"
+                      }`}
+                    >
+                      {tx.transactionType.toUpperCase() === "INCOME"
+                        ? "+"
+                        : "-"}
+                      {tx.price?.toFixed(2)} €
+                    </p>
+                    <Badge
+                      variant={
+                        tx.transactionType.toUpperCase() === "INCOME"
+                          ? "tertiary"
+                          : "default"
+                      }
+                      className="text-[10px]"
+                    >
+                      {tx.transactionType.toUpperCase() === "INCOME"
+                        ? "Ingreso"
+                        : "Gasto"}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Charts: Income + Expenses bar charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Income by Category */}
+        <Card className="shadow-tertiary">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-5 w-5 text-tertiary" />
+              Ingresos por categoría
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {incomeData.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No hay ingresos registrados
+              </p>
+            ) : (
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={incomeData}>
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v) => `${v}€`}
+                  />
+                  <Tooltip
+                    formatter={(value) => [
+                      `${Number(value).toFixed(2)} €`,
+                      "Importe",
+                    ]}
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "none",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    }}
+                  />
+                  <Bar dataKey="total" radius={[6, 6, 0, 0]}>
+                    {incomeData.map((entry, index) => (
+                      <Cell key={`income-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </CardContent>
         </Card>
 
-        {/* Monthly Chart */}
-        <Card className="shadow-secondary">
+        {/* Expenses by Category */}
+        <Card className="shadow-primary">
           <CardHeader>
-            <CardTitle>Ingresos vs Gastos por mes</CardTitle>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingDown className="h-5 w-5 text-primary" />
+              Gastos por categoría
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            {monthlyKeys.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
-                No hay datos para mostrar
+            {expensesData.length === 0 ? (
+              <p className="text-sm text-muted-foreground text-center py-8">
+                No hay gastos registrados
               </p>
             ) : (
-              <div className="space-y-4">
-                <div className="flex items-center gap-4 text-xs">
-                  <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded-full bg-tertiary" />
-                    <span>Ingresos</span>
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <div className="h-3 w-3 rounded-full bg-primary" />
-                    <span>Gastos</span>
-                  </div>
-                </div>
-                <div className="flex items-end gap-2 h-40">
-                  {monthlyKeys.map((key) => {
-                    const [m, y] = key.split("-");
-                    const monthNum = parseInt(m, 10);
-                    const incomeH = (monthlyData[key].income / maxMonthly) * 100;
-                    const expenseH = (monthlyData[key].expense / maxMonthly) * 100;
-                    return (
-                      <div key={key} className="flex-1 flex flex-col items-center gap-1">
-                        <div className="flex items-end gap-0.5 w-full" style={{ height: "120px" }}>
-                          <div
-                            className="flex-1 rounded-t-md bg-tertiary transition-all duration-500"
-                            style={{ height: `${incomeH}%`, minHeight: incomeH > 0 ? "4px" : "0" }}
-                            title={`Ingresos: ${monthlyData[key].income.toFixed(2)} €`}
-                          />
-                          <div
-                            className="flex-1 rounded-t-md bg-primary transition-all duration-500"
-                            style={{ height: `${expenseH}%`, minHeight: expenseH > 0 ? "4px" : "0" }}
-                            title={`Gastos: ${monthlyData[key].expense.toFixed(2)} €`}
-                          />
-                        </div>
-                        <p className="text-[10px] text-muted-foreground">
-                          {MONTH_NAMES[monthNum] || m}
-                        </p>
-                        <p className="text-[9px] text-muted-foreground">{y}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
+              <ResponsiveContainer width="100%" height={250}>
+                <BarChart data={expensesData}>
+                  <XAxis
+                    dataKey="name"
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 12 }}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(v) => `${v}€`}
+                  />
+                  <Tooltip
+                    formatter={(value) => [
+                      `${Number(value).toFixed(2)} €`,
+                      "Importe",
+                    ]}
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "none",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    }}
+                  />
+                  <Bar dataKey="total" radius={[6, 6, 0, 0]}>
+                    {expensesData.map((entry, index) => (
+                      <Cell key={`expense-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </CardContent>
         </Card>
       </div>
+
+      {/* Pie Chart - Full Width */}
+      <Card className="shadow-secondary">
+        <CardHeader>
+          <CardTitle>Distribución por categoría</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {pieData.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-8">
+              No hay datos para mostrar
+            </p>
+          ) : (
+            <ResponsiveContainer width="100%" height={350}>
+              <PieChart>
+                <Pie
+                  data={pieData}
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={60}
+                  outerRadius={120}
+                  paddingAngle={3}
+                  dataKey="value"
+                  nameKey="name"
+                >
+                  {pieData.map((entry, index) => (
+                    <Cell key={`pie-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip
+                  formatter={(value) => [
+                    `${Number(value).toFixed(2)} €`,
+                    "Importe",
+                  ]}
+                  contentStyle={{
+                    borderRadius: "12px",
+                    border: "none",
+                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                  }}
+                />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card className="shadow-tertiary">
