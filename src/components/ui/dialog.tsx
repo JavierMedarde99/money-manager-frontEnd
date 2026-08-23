@@ -1,4 +1,5 @@
 import * as React from "react";
+import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import { X } from "lucide-react";
 import { Button } from "./button";
@@ -12,14 +13,15 @@ interface DialogProps {
 function Dialog({ open, onOpenChange, children }: DialogProps) {
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div
-        className="fixed inset-0 bg-black/50 backdrop-blur-sm animate-bounce-in"
+        className="fixed inset-0 bg-black/50 backdrop-blur-sm"
         onClick={() => onOpenChange(false)}
       />
       <div className="relative z-50">{children}</div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
