@@ -24,10 +24,6 @@ import {
   Plus,
 } from "lucide-react";
 import {
-  BarChart,
-  Bar,
-  XAxis,
-  YAxis,
   Tooltip,
   ResponsiveContainer,
   PieChart,
@@ -35,12 +31,6 @@ import {
   Cell,
   Legend,
 } from "recharts";
-
-interface CategoryData {
-  name: string;
-  total: number;
-  color: string;
-}
 
 interface PieData {
   name: string;
@@ -95,47 +85,34 @@ export function DashboardPage() {
     .sort((a, b) => b.id - a.id)
     .slice(0, 5);
 
-  const incomeData: CategoryData[] = Object.values(
+  const incomePieData: PieData[] = Object.values(
     transactions
       .filter((t) => t.transactionType.toUpperCase() === "INCOME")
       .reduce(
         (acc, t) => {
           const key = t.category.name;
           if (!acc[key])
-            acc[key] = { name: key, total: 0, color: t.category.color };
-          acc[key].total += t.price || 0;
+            acc[key] = { name: key, value: 0, color: t.category.color };
+          acc[key].value += Math.abs(t.price || 0);
           return acc;
         },
-        {} as Record<string, CategoryData>
+        {} as Record<string, PieData>
       )
   );
 
-  const expensesData: CategoryData[] = Object.values(
+  const expensesPieData: PieData[] = Object.values(
     transactions
       .filter((t) => t.transactionType.toUpperCase() === "EXPENSE")
       .reduce(
         (acc, t) => {
           const key = t.category.name;
           if (!acc[key])
-            acc[key] = { name: key, total: 0, color: t.category.color };
-          acc[key].total += t.price || 0;
+            acc[key] = { name: key, value: 0, color: t.category.color };
+          acc[key].value += Math.abs(t.price || 0);
           return acc;
         },
-        {} as Record<string, CategoryData>
+        {} as Record<string, PieData>
       )
-  );
-
-  const pieData: PieData[] = Object.values(
-    transactions.reduce(
-      (acc, t) => {
-        const key = t.category.name;
-        if (!acc[key])
-          acc[key] = { name: key, value: 0, color: t.category.color };
-        acc[key].value += Math.abs(t.price || 0);
-        return acc;
-      },
-      {} as Record<string, PieData>
-    )
   );
 
   const stats = [
@@ -327,9 +304,9 @@ export function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Charts: Income + Expenses bar charts */}
+      {/* Pie Charts: Income + Expenses */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Income by Category */}
+        {/* Income Pie Chart */}
         <Card className="shadow-tertiary">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -338,25 +315,27 @@ export function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {incomeData.length === 0 ? (
+            {incomePieData.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">
                 No hay ingresos registrados
               </p>
             ) : (
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={incomeData}>
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(v) => `${v}€`}
-                  />
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={incomePieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={100}
+                    paddingAngle={3}
+                    dataKey="value"
+                    nameKey="name"
+                  >
+                    {incomePieData.map((entry, index) => (
+                      <Cell key={`income-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
                   <Tooltip
                     formatter={(value) => [
                       `${Number(value).toFixed(2)} €`,
@@ -368,18 +347,14 @@ export function DashboardPage() {
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                     }}
                   />
-                  <Bar dataKey="total" radius={[6, 6, 0, 0]}>
-                    {incomeData.map((entry, index) => (
-                      <Cell key={`income-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
+                  <Legend />
+                </PieChart>
               </ResponsiveContainer>
             )}
           </CardContent>
         </Card>
 
-        {/* Expenses by Category */}
+        {/* Expenses Pie Chart */}
         <Card className="shadow-primary">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -388,25 +363,27 @@ export function DashboardPage() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            {expensesData.length === 0 ? (
+            {expensesPieData.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-8">
                 No hay gastos registrados
               </p>
             ) : (
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={expensesData}>
-                  <XAxis
-                    dataKey="name"
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <YAxis
-                    tick={{ fontSize: 12 }}
-                    tickLine={false}
-                    axisLine={false}
-                    tickFormatter={(v) => `${v}€`}
-                  />
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={expensesPieData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={100}
+                    paddingAngle={3}
+                    dataKey="value"
+                    nameKey="name"
+                  >
+                    {expensesPieData.map((entry, index) => (
+                      <Cell key={`expense-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
                   <Tooltip
                     formatter={(value) => [
                       `${Number(value).toFixed(2)} €`,
@@ -418,62 +395,13 @@ export function DashboardPage() {
                       boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                     }}
                   />
-                  <Bar dataKey="total" radius={[6, 6, 0, 0]}>
-                    {expensesData.map((entry, index) => (
-                      <Cell key={`expense-${index}`} fill={entry.color} />
-                    ))}
-                  </Bar>
-                </BarChart>
+                  <Legend />
+                </PieChart>
               </ResponsiveContainer>
             )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Pie Chart - Full Width */}
-      <Card className="shadow-secondary">
-        <CardHeader>
-          <CardTitle>Distribución por categoría</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {pieData.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-8">
-              No hay datos para mostrar
-            </p>
-          ) : (
-            <ResponsiveContainer width="100%" height={350}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={60}
-                  outerRadius={120}
-                  paddingAngle={3}
-                  dataKey="value"
-                  nameKey="name"
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell key={`pie-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip
-                  formatter={(value) => [
-                    `${Number(value).toFixed(2)} €`,
-                    "Importe",
-                  ]}
-                  contentStyle={{
-                    borderRadius: "12px",
-                    border: "none",
-                    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                  }}
-                />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </CardContent>
-      </Card>
 
       {/* Quick Actions */}
       <Card className="shadow-tertiary">
