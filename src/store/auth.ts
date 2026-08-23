@@ -13,6 +13,8 @@ interface AuthState {
   register: (data: UserRequestDTO) => Promise<void>;
   logout: () => void;
   fetchProfile: () => Promise<void>;
+  updateProfile: (data: UserRequestDTO) => Promise<void>;
+  deleteAccount: () => Promise<void>;
   clearError: () => void;
 }
 
@@ -85,6 +87,37 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       set({ token: null, user: null, isAuthenticated: false, initializing: false });
+    }
+  },
+
+  updateProfile: async (data: UserRequestDTO) => {
+    set({ isLoading: true, error: null });
+    try {
+      const updated = await userApi.update(data);
+      localStorage.setItem("user", JSON.stringify(updated));
+      set({ user: updated, isLoading: false });
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const message =
+        axiosError.response?.data?.message || "Error al actualizar perfil";
+      set({ error: message, isLoading: false });
+      throw error;
+    }
+  },
+
+  deleteAccount: async () => {
+    set({ isLoading: true, error: null });
+    try {
+      await userApi.delete();
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      set({ token: null, user: null, isAuthenticated: false, isLoading: false });
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      const message =
+        axiosError.response?.data?.message || "Error al eliminar cuenta";
+      set({ error: message, isLoading: false });
+      throw error;
     }
   },
 

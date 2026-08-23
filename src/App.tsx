@@ -8,6 +8,7 @@ import { CategoriesPage } from "@/pages/Categories";
 import { TransactionsPage } from "@/pages/Transactions";
 import { DebtsPage } from "@/pages/Debts";
 import { DashboardPage } from "@/pages/Dashboard";
+import { ProfilePage } from "@/pages/Profile";
 import { useAuthStore } from "@/store/auth";
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/debts" element={<DebtsPage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
