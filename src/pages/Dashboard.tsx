@@ -306,81 +306,6 @@ export function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Recent Transactions - Full Width */}
-      <Card className="shadow-primary">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Transacciones recientes</CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/transactions")}
-          >
-            Ver todas
-            <ArrowRightLeft className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {recentTransactions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No hay transacciones recientes
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {recentTransactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-8 w-8 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: tx.category.color + "20" }}
-                    >
-                      <div
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: tx.category.color }}
-                      />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{tx.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {tx.transactionDate}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-bold ${
-                        tx.transactionType.toUpperCase() === "INCOME"
-                          ? "text-tertiary"
-                          : "text-primary"
-                      }`}
-                    >
-                      {tx.transactionType.toUpperCase() === "INCOME"
-                        ? "+"
-                        : "-"}
-                      {tx.price?.toFixed(2)} €
-                    </p>
-                    <Badge
-                      variant={
-                        tx.transactionType.toUpperCase() === "INCOME"
-                          ? "tertiary"
-                          : "default"
-                      }
-                      className="text-[10px]"
-                    >
-                      {tx.transactionType.toUpperCase() === "INCOME"
-                        ? "Ingreso"
-                        : "Gasto"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
       {/* Pie Charts: Income + Expenses */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income Pie Chart */}
@@ -479,6 +404,81 @@ export function DashboardPage() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Recent Transactions - Full Width */}
+      <Card className="shadow-primary">
+        <CardHeader className="flex flex-row items-center justify-between">
+          <CardTitle>Transacciones recientes</CardTitle>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate("/transactions")}
+          >
+            Ver todas
+            <ArrowRightLeft className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {recentTransactions.length === 0 ? (
+            <p className="text-sm text-muted-foreground text-center py-4">
+              No hay transacciones recientes
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {recentTransactions.map((tx) => (
+                <div
+                  key={tx.id}
+                  className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div
+                      className="h-8 w-8 rounded-full flex items-center justify-center"
+                      style={{ backgroundColor: tx.category.color + "20" }}
+                    >
+                      <div
+                        className="h-3 w-3 rounded-full"
+                        style={{ backgroundColor: tx.category.color }}
+                      />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold">{tx.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {tx.transactionDate}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p
+                      className={`text-sm font-bold ${
+                        tx.transactionType.toUpperCase() === "INCOME"
+                          ? "text-tertiary"
+                          : "text-primary"
+                      }`}
+                    >
+                      {tx.transactionType.toUpperCase() === "INCOME"
+                        ? "+"
+                        : "-"}
+                      {tx.price?.toFixed(2)} €
+                    </p>
+                    <Badge
+                      variant={
+                        tx.transactionType.toUpperCase() === "INCOME"
+                          ? "tertiary"
+                          : "default"
+                      }
+                      className="text-[10px]"
+                    >
+                      {tx.transactionType.toUpperCase() === "INCOME"
+                        ? "Ingreso"
+                        : "Gasto"}
+                    </Badge>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Quick Actions */}
       <Card className="shadow-tertiary">
