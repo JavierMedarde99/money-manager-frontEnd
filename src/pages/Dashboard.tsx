@@ -46,11 +46,17 @@ export function DashboardPage() {
   const [categories, setCategories] = useState<CategoryResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const now = new Date();
+  const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
+  const monthFirstDay = `${currentMonth}-01`;
+  const lastDay = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const monthLastDay = `${currentMonth}-${String(lastDay).padStart(2, "0")}`;
+
   useEffect(() => {
     async function load() {
       try {
         const [txData, debtData, catData] = await Promise.all([
-          transactionApi.getAll({ page: 0, size: 50 }),
+          transactionApi.getAll({ page: 0, size: 200, from: monthFirstDay, to: monthLastDay }),
           debtApi.getAll(),
           categoryApi.getAll(),
         ]);
@@ -64,7 +70,7 @@ export function DashboardPage() {
       }
     }
     load();
-  }, []);
+  }, [monthFirstDay, monthLastDay]);
 
   const totalIncome = transactions
     .filter((t) => t.transactionType.toUpperCase() === "INCOME")
@@ -74,8 +80,19 @@ export function DashboardPage() {
     .filter((t) => t.transactionType.toUpperCase() === "EXPENSE")
     .reduce((sum, t) => sum + (t.price || 0), 0);
 
-  const totalDebt = debts.reduce((sum, d) => sum + d.totalAmount, 0);
-  const totalPaid = debts.reduce(
+  const debtsThisMonth = debts.filter((d) =>
+    d.payments?.some((p) => {
+      const parts = p.paymentDate.split("-");
+      if (parts.length === 3) {
+        const payMonth = `${parts[0]}-${parts[1]}`;
+        return payMonth === currentMonth;
+      }
+      return p.paymentDate.substring(0, 7) === currentMonth;
+    })
+  );
+
+  const totalDebt = debtsThisMonth.reduce((sum, d) => sum + d.totalAmount, 0);
+  const totalPaid = debtsThisMonth.reduce(
     (sum, d) => sum + (d.payments?.reduce((ps, p) => ps + p.amount, 0) || 0),
     0
   );
@@ -114,6 +131,9 @@ export function DashboardPage() {
         {} as Record<string, PieData>
       )
   );
+
+  const MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+  const currentMonthName = MONTH_NAMES[now.getMonth()];
 
   const stats = [
     {
@@ -166,7 +186,7 @@ export function DashboardPage() {
           Hola, {user?.username || "Usuario"} 👋
         </h1>
         <p className="text-muted-foreground">
-          Aquí tienes un resumen de tu situación financiera
+          Resumen de {currentMonthName} {now.getFullYear()}
         </p>
       </div>
 
