@@ -63,7 +63,7 @@ export interface PageTransactionResponseDTO {
 export interface DebtRequestDTO {
   name: string;
   totalAmount?: number;
-  starDate: string;
+  startDate: string;
   endDate?: string;
 }
 
@@ -71,7 +71,7 @@ export interface DebtResponseDTO {
   id: number;
   name: string;
   totalAmount: number;
-  starDate: string;
+  startDate: string;
   endDate: string;
   payments: PaymentResponseDTO[];
 }

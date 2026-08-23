@@ -40,8 +40,6 @@ import {
   Banknote,
 } from "lucide-react";
 
-import { toBackendDate, fromBackendDate } from "@/lib/dateUtils";
-
 export function DebtsPage() {
   const [debts, setDebts] = useState<DebtResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +53,7 @@ export function DebtsPage() {
   // Debt form
   const [name, setName] = useState("");
   const [totalAmount, setTotalAmount] = useState<number>(0);
-  const [starDate, setStarDate] = useState("");
+  const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
   // Payment form
@@ -85,7 +83,7 @@ export function DebtsPage() {
     setEditing(null);
     setName("");
     setTotalAmount(0);
-    setStarDate(new Date().toISOString().split("T")[0]);
+    setStartDate(new Date().toISOString().split("T")[0]);
     setEndDate("");
     setDialogOpen(true);
   };
@@ -94,8 +92,8 @@ export function DebtsPage() {
     setEditing(debt);
     setName(debt.name);
     setTotalAmount(debt.totalAmount);
-    setStarDate(fromBackendDate(debt.starDate));
-    setEndDate(debt.endDate ? fromBackendDate(debt.endDate) : "");
+    setStartDate(debt.startDate);
+    setEndDate(debt.endDate ? debt.endDate : "");
     setDialogOpen(true);
   };
 
@@ -106,8 +104,8 @@ export function DebtsPage() {
     const payload: DebtRequestDTO = {
       name,
       totalAmount,
-      starDate: toBackendDate(starDate),
-      endDate: endDate ? toBackendDate(endDate) : undefined,
+      startDate,
+      endDate: endDate || undefined,
     };
 
     try {
@@ -156,7 +154,7 @@ export function DebtsPage() {
     setPaymentError(null);
 
     const payload: PaymentRequestDTO = {
-      paymentDate: toBackendDate(paymentDate),
+      paymentDate,
       amount: paymentAmount,
       debt: { id: paymentDebt.id } as DebtResponseDTO,
     };
@@ -236,7 +234,7 @@ export function DebtsPage() {
                       <p className="font-bold">{debt.name}</p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
                         <Calendar className="h-3 w-3" />
-                        {debt.starDate}
+                        {debt.startDate}
                         {debt.endDate && ` → ${debt.endDate}`}
                       </p>
                     </div>
@@ -409,8 +407,8 @@ export function DebtsPage() {
                 <Input
                   id="debt-start"
                   type="date"
-                  value={starDate}
-                  onChange={(e) => setStarDate(e.target.value)}
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
                   required
                 />
               </div>
