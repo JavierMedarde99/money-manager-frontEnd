@@ -58,12 +58,19 @@ export function DashboardPage() {
   useEffect(() => {
     async function load() {
       try {
-        const [txData, debtData, catData] = await Promise.all([
+        const [txData, fixedTxData, debtData, catData] = await Promise.all([
           transactionApi.getAll({ page: 0, size: 200, from: monthFirstDay, to: monthLastDay }),
+          transactionApi.getAllFixed(),
           debtApi.getAll(),
           categoryApi.getAll(),
         ]);
-        setTransactions(txData.content);
+        const normalTxs = txData.content;
+        const fixedTxs = fixedTxData.filter(
+          (t) => t.transactionDate <= monthLastDay
+        );
+        const fixedIds = new Set(normalTxs.map((t) => t.id));
+        const merged = [...normalTxs, ...fixedTxs.filter((t) => !fixedIds.has(t.id))];
+        setTransactions(merged);
         setDebts(debtData);
         setCategories(catData);
       } catch {
