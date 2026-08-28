@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
+import { Toggle } from "@/components/ui/toggle";
 import {
   Table,
   TableHeader,
@@ -61,6 +62,7 @@ export function DebtsPage() {
   const [paymentDebt, setPaymentDebt] = useState<DebtResponseDTO | null>(null);
   const [paymentDate, setPaymentDate] = useState("");
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
+  const [automaticPayment, setAutomaticPayment] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
 
@@ -143,6 +145,7 @@ export function DebtsPage() {
     setPaymentDate(new Date().toISOString().split("T")[0]);
     const remaining = getRemainingAmount(debt);
     setPaymentAmount(remaining > 0 ? remaining : 0);
+    setAutomaticPayment(false);
     setPaymentError(null);
     setPaymentDialogOpen(true);
   };
@@ -156,6 +159,7 @@ export function DebtsPage() {
     const payload: PaymentRequestDTO = {
       paymentDate,
       amount: paymentAmount,
+      automaticPayment,
       debt: { id: paymentDebt.id } as DebtResponseDTO,
     };
 
@@ -490,6 +494,18 @@ export function DebtsPage() {
                   required
                 />
               </div>
+            </div>
+            <div className="flex items-center justify-between p-3 rounded-xl bg-muted">
+              <div className="space-y-1">
+                <Label htmlFor="pay-automatic">Pago automático</Label>
+                <p className="text-xs text-muted-foreground">
+                  Se repetirá cada principio de mes
+                </p>
+              </div>
+              <Toggle
+                checked={automaticPayment}
+                onCheckedChange={setAutomaticPayment}
+              />
             </div>
             <DialogFooter>
               <Button

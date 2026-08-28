@@ -79,6 +79,7 @@ export interface DebtResponseDTO {
 export interface PaymentRequestDTO {
   paymentDate: string;
   amount: number;
+  automaticPayment: boolean;
   debt: DebtResponseDTO;
 }
 
