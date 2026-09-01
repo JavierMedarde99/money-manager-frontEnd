@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { transactionApi } from "@/api/transaction";
 import { categoryApi } from "@/api/category";
 import type {
@@ -37,6 +38,8 @@ import {
   ArrowRightLeft,
   Filter,
   X,
+  AlertCircle,
+  FolderOpen,
 } from "lucide-react";
 
 const TRANSACTION_TYPES = [
@@ -50,10 +53,12 @@ const TRANSACTION_SUBTYPES = [
 ];
 
 export function TransactionsPage() {
+  const navigate = useNavigate();
   const [data, setData] = useState<PageTransactionResponseDTO | null>(null);
   const [categories, setCategories] = useState<CategoryResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [noCategoryDialog, setNoCategoryDialog] = useState(false);
   const [editing, setEditing] = useState<TransactionResponseDTO | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
@@ -105,6 +110,10 @@ export function TransactionsPage() {
   }, [categoryId, categories]);
 
   const openCreate = () => {
+    if (categories.length === 0) {
+      setNoCategoryDialog(true);
+      return;
+    }
     setEditing(null);
     setName("");
     setTransactionDate(new Date().toISOString().split("T")[0]);
@@ -113,7 +122,7 @@ export function TransactionsPage() {
     setTransactionType("INCOME");
     setTransactionSubtype("VARIABLE");
     setFormError(null);
-    if (categories.length > 0) setCategoryId(categories[0].id);
+    setCategoryId(categories[0].id);
     setDialogOpen(true);
   };
 
@@ -514,6 +523,37 @@ export function TransactionsPage() {
               onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
             >
               Eliminar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* No Category Dialog */}
+      <Dialog open={noCategoryDialog} onOpenChange={setNoCategoryDialog}>
+        <DialogContent onClose={() => setNoCategoryDialog(false)}>
+          <DialogHeader>
+            <DialogTitle>No hay categorías</DialogTitle>
+          </DialogHeader>
+          <div className="flex items-start gap-3 mt-2">
+            <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center shrink-0">
+              <AlertCircle className="h-5 w-5 text-red-500" />
+            </div>
+            <div>
+              <p className="font-semibold">
+                Por favor inserta una categoría para poder añadir una transacción
+              </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Las transacciones necesitan una categoría asociada.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setNoCategoryDialog(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={() => navigate("/categories")}>
+              <FolderOpen className="h-4 w-4" />
+              Ir a Categorías
             </Button>
           </DialogFooter>
         </DialogContent>
