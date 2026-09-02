@@ -48,6 +48,7 @@ export function DashboardPage() {
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedDebtIndex, setSelectedDebtIndex] = useState(0);
 
   const monthStr = String(selectedMonth + 1).padStart(2, "0");
   const currentMonth = `${selectedYear}-${monthStr}`;
@@ -107,6 +108,15 @@ export function DashboardPage() {
     0
   );
   const remainingDebt = totalDebt - totalPaid;
+
+  const remainingDebts = debts
+    .filter((d) => {
+      const paid = d.payments?.reduce((ps, p) => ps + p.amount, 0) || 0;
+      return d.totalAmount - paid > 0;
+    })
+    .sort((a, b) => a.startDate.localeCompare(b.startDate));
+
+  const currentDebt = remainingDebts[selectedDebtIndex % remainingDebts.length] || null;
 
   const recentTransactions = [...transactions]
     .sort((a, b) => b.id - a.id)
@@ -187,12 +197,19 @@ export function DashboardPage() {
       shadow: "shadow-primary",
     },
     {
-      title: "Deuda restante",
-      value: `${remainingDebt.toFixed(2)} €`,
+      title: currentDebt
+        ? `Deuda restante: ${currentDebt.name}`
+        : "Deuda restante",
+      value: currentDebt
+        ? `${(currentDebt.totalAmount - (currentDebt.payments?.reduce((ps, p) => ps + p.amount, 0) || 0)).toFixed(2)} €`
+        : `${remainingDebt.toFixed(2)} €`,
       icon: CreditCard,
       color: "text-secondary",
       bg: "bg-secondary-50",
       shadow: "shadow-secondary",
+      onClick: remainingDebts.length > 1
+        ? () => setSelectedDebtIndex((i) => (i + 1) % remainingDebts.length)
+        : undefined,
     },
     {
       title: "Categorías",
@@ -254,8 +271,9 @@ export function DashboardPage() {
         {stats.map((stat, index) => (
           <Card
             key={stat.title}
-            className={`${stat.shadow}`}
+            className={`${stat.shadow} ${stat.onClick ? "cursor-pointer hover:scale-[1.02] transition-transform" : ""}`}
             style={{ animationDelay: `${index * 100}ms` }}
+            onClick={stat.onClick}
           >
             <CardContent className="p-5">
               <div className="flex items-center justify-between">
