@@ -92,7 +92,7 @@ export function DashboardPage() {
     .reduce((sum, t) => sum + (t.price || 0), 0);
 
   const debtsThisMonth = debts.filter((d) =>
-    d.payments?.some((p) => {
+    d.payments?.content.some((p) => {
       const parts = p.paymentDate.split("-");
       if (parts.length === 3) {
         const payMonth = `${parts[0]}-${parts[1]}`;
@@ -104,14 +104,14 @@ export function DashboardPage() {
 
   const totalDebt = debtsThisMonth.reduce((sum, d) => sum + d.totalAmount, 0);
   const totalPaid = debtsThisMonth.reduce(
-    (sum, d) => sum + (d.payments?.reduce((ps, p) => ps + p.amount, 0) || 0),
+    (sum, d) => sum + (d.payments?.content.reduce((ps, p) => ps + p.amount, 0) || 0),
     0
   );
   const remainingDebt = totalDebt - totalPaid;
 
   const remainingDebts = debts
     .filter((d) => {
-      const paid = d.payments?.reduce((ps, p) => ps + p.amount, 0) || 0;
+      const paid = d.payments?.content.reduce((ps, p) => ps + p.amount, 0) || 0;
       return d.totalAmount - paid > 0;
     })
     .sort((a, b) => a.startDate.localeCompare(b.startDate));
@@ -201,7 +201,7 @@ export function DashboardPage() {
         ? `Deuda restante: ${currentDebt.name}`
         : "Deuda restante",
       value: currentDebt
-        ? `${(currentDebt.totalAmount - (currentDebt.payments?.reduce((ps, p) => ps + p.amount, 0) || 0)).toFixed(2)} €`
+        ? `${(currentDebt.totalAmount - (currentDebt.payments?.content.reduce((ps, p) => ps + p.amount, 0) || 0)).toFixed(2)} €`
         : `${remainingDebt.toFixed(2)} €`,
       icon: CreditCard,
       color: "text-secondary",
