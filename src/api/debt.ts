@@ -9,8 +9,15 @@ export const debtApi = {
     return apiClient.post("/debt", data).then((res) => res.data);
   },
 
-  getAll(): Promise<DebtResponseDTO[]> {
-    return apiClient.get("/debt/all").then((res) => res.data);
+  getAll(page?: number, size?: number): Promise<DebtResponseDTO[]> {
+    return apiClient
+      .get("/debt/all", {
+        params: {
+          page: page ?? 0,
+          size: size ?? 10,
+        },
+      })
+      .then((res) => res.data);
   },
 
   getById(id: number): Promise<DebtResponseDTO> {

@@ -6,6 +6,7 @@ import type {
   DebtRequestDTO,
   PaymentRequestDTO,
   PaymentResponseDTO,
+  PagePaymentResponseDTO,
 } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -70,6 +71,10 @@ export function DebtsPage() {
   const [deletePaymentConfirm, setDeletePaymentConfirm] = useState<{ debtId: number; paymentId: number } | null>(null);
   const [deletePaymentError, setDeletePaymentError] = useState<string | null>(null);
 
+  // Payments pagination for expanded debt
+  const [paymentsPage, setPaymentsPage] = useState<PagePaymentResponseDTO | null>(null);
+  const [paymentPageLoading, setPaymentPageLoading] = useState(false);
+
   const fetchDebts = useCallback(async () => {
     try {
       const data = await debtApi.getAll();
@@ -84,6 +89,20 @@ export function DebtsPage() {
   useEffect(() => {
     fetchDebts();
   }, [fetchDebts]);
+
+  const fetchDebtPayments = useCallback(async (debtId: number) => {
+      setPaymentPageLoading(true);
+      try {
+        const debt = await debtApi.getById(debtId);
+        setPaymentsPage(debt.payments);
+      } catch {
+        // error handled by UI state
+      } finally {
+        setPaymentPageLoading(false);
+      }
+    },
+    []
+  );
 
   const openCreate = () => {
     setEditing(null);
@@ -186,6 +205,9 @@ export function DebtsPage() {
       }
       setPaymentDialogOpen(false);
       await fetchDebts();
+      if (expandedId === paymentDebt.id) {
+        await fetchDebtPayments(paymentDebt.id);
+      }
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { message?: string } } };
       setPaymentError(
@@ -201,6 +223,9 @@ export function DebtsPage() {
     try {
       await paymentApi.delete(paymentId);
       await fetchDebts();
+      if (expandedId === _debtId) {
+        await fetchDebtPayments(_debtId);
+      }
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { message?: string } } };
       setDeletePaymentError(
@@ -212,17 +237,23 @@ export function DebtsPage() {
   };
 
   const toggleExpand = (id: number) => {
-    setExpandedId(expandedId === id ? null : id);
+    const nextExpanded = expandedId === id ? null : id;
+    setExpandedId(nextExpanded);
+    if (nextExpanded) {
+      fetchDebtPayments(id);
+    } else {
+      setPaymentsPage(null);
+    }
   };
 
   const getRemainingAmount = (debt: DebtResponseDTO) => {
-    const paid = debt.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
+    const paid = debt.payments?.content.reduce((sum, p) => sum + p.amount, 0) || 0;
     return debt.totalAmount - paid;
   };
 
   const getProgress = (debt: DebtResponseDTO) => {
     if (debt.totalAmount === 0) return 100;
-    const paid = debt.payments?.reduce((sum, p) => sum + p.amount, 0) || 0;
+    const paid = debt.payments?.content.reduce((sum, p) => sum + p.amount, 0) || 0;
     return Math.min(100, (paid / debt.totalAmount) * 100);
   };
 
@@ -360,7 +391,7 @@ export function DebtsPage() {
                     <div className="p-4">
                       <div className="flex items-center justify-between mb-3">
                         <h4 className="font-bold text-sm">
-                          Pagos ({debt.payments?.length || 0})
+                          Pagos ({paymentsPage?.totalElements ?? 0})
                         </h4>
                         {!isPaid && (
                           <Button
@@ -375,55 +406,68 @@ export function DebtsPage() {
                           </Button>
                         )}
                       </div>
-                      {!debt.payments || debt.payments.length === 0 ? (
+                      {paymentPageLoading ? (
+                        <div className="flex items-center justify-center py-8">
+                          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                        </div>
+                      ) : !paymentsPage || paymentsPage.content.length === 0 ? (
                         <p className="text-sm text-muted-foreground">
                           No se han registrado pagos para esta deuda
                         </p>
                       ) : (
-                        <Table>
-                          <TableHeader>
-                            <TableRow>
-                              <TableHead>Fecha</TableHead>
-                              <TableHead className="text-right">Monto</TableHead>
-                              <TableHead className="text-right w-24">Acciones</TableHead>
-                            </TableRow>
-                          </TableHeader>
-                          <TableBody>
-                            {debt.payments.map((payment) => (
-                              <TableRow key={payment.id}>
-                                <TableCell>{payment.paymentDate}</TableCell>
-                                <TableCell className="text-right font-semibold text-green-600">
-                                  -{payment.amount.toFixed(2)} €
-                                </TableCell>
-                                <TableCell className="text-right">
-                                  <div className="flex items-center justify-end gap-1">
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        openEditPayment(debt, payment);
-                                      }}
-                                    >
-                                      <Pencil className="h-3 w-3" />
-                                    </Button>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      onClick={(e) => {
-                                        e.stopPropagation();
-                                        setDeletePaymentConfirm({ debtId: debt.id, paymentId: payment.id });
-                                      }}
-                                      className="text-destructive hover:text-destructive"
-                                    >
-                                      <Trash2 className="h-3 w-3" />
-                                    </Button>
-                                  </div>
-                                </TableCell>
+                        <>
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Fecha</TableHead>
+                                <TableHead className="text-right">Monto</TableHead>
+                                <TableHead className="text-right w-24">Acciones</TableHead>
                               </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
+                            </TableHeader>
+                            <TableBody>
+                              {paymentsPage.content.map((payment) => (
+                                <TableRow key={payment.id}>
+                                  <TableCell>{payment.paymentDate}</TableCell>
+                                  <TableCell className="text-right font-semibold text-green-600">
+                                    -{payment.amount.toFixed(2)} €
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    <div className="flex items-center justify-end gap-1">
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          openEditPayment(debt, payment);
+                                        }}
+                                      >
+                                        <Pencil className="h-3 w-3" />
+                                      </Button>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setDeletePaymentConfirm({ debtId: debt.id, paymentId: payment.id });
+                                        }}
+                                        className="text-destructive hover:text-destructive"
+                                      >
+                                        <Trash2 className="h-3 w-3" />
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                          {(paymentsPage.totalPages ?? 0) > 1 && (
+                            <div className="flex items-center justify-center gap-3 mt-4">
+                              <span className="text-sm text-muted-foreground">
+                                Página 1 de {paymentsPage.totalPages}
+                              </span>
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
                   </div>

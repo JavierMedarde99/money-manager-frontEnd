@@ -73,7 +73,15 @@ export interface DebtResponseDTO {
   totalAmount: number;
   startDate: string;
   endDate: string;
-  payments: PaymentResponseDTO[];
+  payments: PagePaymentResponseDTO;
+}
+
+export interface PagePaymentResponseDTO {
+  content: PaymentResponseDTO[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
 }
 
 export interface PaymentRequestDTO {
