@@ -5,6 +5,7 @@ import type {
   DebtResponseDTO,
   DebtRequestDTO,
   PaymentRequestDTO,
+  PaymentResponseDTO,
 } from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,11 +61,14 @@ export function DebtsPage() {
   // Payment form
   const [paymentDialogOpen, setPaymentDialogOpen] = useState(false);
   const [paymentDebt, setPaymentDebt] = useState<DebtResponseDTO | null>(null);
+  const [editingPayment, setEditingPayment] = useState<PaymentResponseDTO | null>(null);
   const [paymentDate, setPaymentDate] = useState("");
   const [paymentAmount, setPaymentAmount] = useState<number>(0);
   const [automaticPayment, setAutomaticPayment] = useState(false);
   const [savingPayment, setSavingPayment] = useState(false);
   const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [deletePaymentConfirm, setDeletePaymentConfirm] = useState<{ debtId: number; paymentId: number } | null>(null);
+  const [deletePaymentError, setDeletePaymentError] = useState<string | null>(null);
 
   const fetchDebts = useCallback(async () => {
     try {
@@ -142,9 +146,20 @@ export function DebtsPage() {
 
   const openPaymentDialog = (debt: DebtResponseDTO) => {
     setPaymentDebt(debt);
+    setEditingPayment(null);
     setPaymentDate(new Date().toISOString().split("T")[0]);
     const remaining = getRemainingAmount(debt);
     setPaymentAmount(remaining > 0 ? remaining : 0);
+    setAutomaticPayment(false);
+    setPaymentError(null);
+    setPaymentDialogOpen(true);
+  };
+
+  const openEditPayment = (debt: DebtResponseDTO, payment: PaymentResponseDTO) => {
+    setPaymentDebt(debt);
+    setEditingPayment(payment);
+    setPaymentDate(payment.paymentDate);
+    setPaymentAmount(payment.amount);
     setAutomaticPayment(false);
     setPaymentError(null);
     setPaymentDialogOpen(true);
@@ -164,16 +179,35 @@ export function DebtsPage() {
     };
 
     try {
-      await paymentApi.insert(payload);
+      if (editingPayment) {
+        await paymentApi.update(editingPayment.id, payload);
+      } else {
+        await paymentApi.insert(payload);
+      }
       setPaymentDialogOpen(false);
       await fetchDebts();
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { message?: string } } };
       setPaymentError(
-        axiosError.response?.data?.message || "Error al registrar el pago"
+        axiosError.response?.data?.message || "Error al guardar el pago"
       );
     } finally {
       setSavingPayment(false);
+    }
+  };
+
+  const handleDeletePayment = async (_debtId: number, paymentId: number) => {
+    setDeletePaymentError(null);
+    try {
+      await paymentApi.delete(paymentId);
+      await fetchDebts();
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setDeletePaymentError(
+        axiosError.response?.data?.message || "No se puede eliminar el pago"
+      );
+    } finally {
+      setDeletePaymentConfirm(null);
     }
   };
 
@@ -351,6 +385,7 @@ export function DebtsPage() {
                             <TableRow>
                               <TableHead>Fecha</TableHead>
                               <TableHead className="text-right">Monto</TableHead>
+                              <TableHead className="text-right w-24">Acciones</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -359,6 +394,31 @@ export function DebtsPage() {
                                 <TableCell>{payment.paymentDate}</TableCell>
                                 <TableCell className="text-right font-semibold text-green-600">
                                   -{payment.amount.toFixed(2)} €
+                                </TableCell>
+                                <TableCell className="text-right">
+                                  <div className="flex items-center justify-end gap-1">
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        openEditPayment(debt, payment);
+                                      }}
+                                    >
+                                      <Pencil className="h-3 w-3" />
+                                    </Button>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        setDeletePaymentConfirm({ debtId: debt.id, paymentId: payment.id });
+                                      }}
+                                      className="text-destructive hover:text-destructive"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                    </Button>
+                                  </div>
                                 </TableCell>
                               </TableRow>
                             ))}
@@ -455,7 +515,7 @@ export function DebtsPage() {
       >
         <DialogContent onClose={() => setPaymentDialogOpen(false)}>
           <DialogHeader>
-            <DialogTitle>Registrar Pago</DialogTitle>
+            <DialogTitle>{editingPayment ? "Editar Pago" : "Registrar Pago"}</DialogTitle>
           </DialogHeader>
           {paymentDebt && (
             <div className="mb-4 p-3 rounded-xl bg-muted">
@@ -518,12 +578,52 @@ export function DebtsPage() {
               <Button type="submit" disabled={savingPayment}>
                 {savingPayment ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
+                ) : editingPayment ? (
+                  "Guardar"
                 ) : (
                   "Registrar Pago"
                 )}
               </Button>
             </DialogFooter>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Payment Confirmation Dialog */}
+      <Dialog
+        open={deletePaymentConfirm !== null}
+        onOpenChange={() => { setDeletePaymentConfirm(null); setDeletePaymentError(null); }}
+      >
+        <DialogContent onClose={() => { setDeletePaymentConfirm(null); setDeletePaymentError(null); }}>
+          <DialogHeader>
+            <DialogTitle>Eliminar Pago</DialogTitle>
+          </DialogHeader>
+          {deletePaymentError ? (
+            <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2">
+              {deletePaymentError}
+            </div>
+          ) : (
+            <p className="text-muted-foreground mt-2">
+              ¿Estás seguro de que quieres eliminar este pago? Esta acción
+              no se puede deshacer.
+            </p>
+          )}
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => { setDeletePaymentConfirm(null); setDeletePaymentError(null); }}
+            >
+              {deletePaymentError ? "Cerrar" : "Cancelar"}
+            </Button>
+            {!deletePaymentError && (
+              <Button
+                variant="destructive"
+                onClick={() => deletePaymentConfirm && handleDeletePayment(deletePaymentConfirm.debtId, deletePaymentConfirm.paymentId)}
+              >
+                Eliminar
+              </Button>
+            )}
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
