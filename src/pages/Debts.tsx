@@ -50,6 +50,7 @@ export function DebtsPage() {
   const [editing, setEditing] = useState<DebtResponseDTO | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deletingDebt, setDeletingDebt] = useState(false);
   const [saving, setSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
 
@@ -70,6 +71,7 @@ export function DebtsPage() {
   const [paymentError, setPaymentError] = useState<string | null>(null);
   const [deletePaymentConfirm, setDeletePaymentConfirm] = useState<{ debtId: number; paymentId: number } | null>(null);
   const [deletePaymentError, setDeletePaymentError] = useState<string | null>(null);
+  const [deletingPayment, setDeletingPayment] = useState(false);
 
   // Payments pagination for expanded debt
   const [paymentsPage, setPaymentsPage] = useState<PagePaymentResponseDTO | null>(null);
@@ -150,6 +152,7 @@ export function DebtsPage() {
 
   const handleDelete = async (id: number) => {
     setDeleteError(null);
+    setDeletingDebt(true);
     try {
       await debtApi.delete(id);
       await fetchDebts();
@@ -160,6 +163,7 @@ export function DebtsPage() {
       );
     } finally {
       setDeleteConfirm(null);
+      setDeletingDebt(false);
     }
   };
 
@@ -220,6 +224,7 @@ export function DebtsPage() {
 
   const handleDeletePayment = async (_debtId: number, paymentId: number) => {
     setDeletePaymentError(null);
+    setDeletingPayment(true);
     try {
       await paymentApi.delete(paymentId);
       await fetchDebts();
@@ -233,6 +238,7 @@ export function DebtsPage() {
       );
     } finally {
       setDeletePaymentConfirm(null);
+      setDeletingPayment(false);
     }
   };
 
@@ -662,9 +668,14 @@ export function DebtsPage() {
             {!deletePaymentError && (
               <Button
                 variant="destructive"
+                disabled={deletingPayment}
                 onClick={() => deletePaymentConfirm && handleDeletePayment(deletePaymentConfirm.debtId, deletePaymentConfirm.paymentId)}
               >
-                Eliminar
+                {deletingPayment ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Eliminar"
+                )}
               </Button>
             )}
           </DialogFooter>
@@ -700,9 +711,14 @@ export function DebtsPage() {
             {!deleteError && (
               <Button
                 variant="destructive"
+                disabled={deletingDebt}
                 onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
               >
-                Eliminar
+                {deletingDebt ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Eliminar"
+                )}
               </Button>
             )}
           </DialogFooter>

@@ -62,6 +62,7 @@ export function TransactionsPage() {
   const [editing, setEditing] = useState<TransactionResponseDTO | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   // Filters
@@ -175,6 +176,7 @@ export function TransactionsPage() {
   };
 
   const handleDelete = async (id: number) => {
+    setDeleting(true);
     try {
       await transactionApi.delete(id);
       await fetchData();
@@ -182,6 +184,7 @@ export function TransactionsPage() {
       // silent
     } finally {
       setDeleteConfirm(null);
+      setDeleting(false);
     }
   };
 
@@ -520,9 +523,14 @@ export function TransactionsPage() {
             </Button>
             <Button
               variant="destructive"
+              disabled={deleting}
               onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
             >
-              Eliminar
+              {deleting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Eliminar"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

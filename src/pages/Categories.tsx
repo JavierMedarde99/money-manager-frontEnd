@@ -32,6 +32,7 @@ export function CategoriesPage() {
   const [saving, setSaving] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [deleting, setDeleting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
   const fetchCategories = async () => {
@@ -90,6 +91,7 @@ export function CategoriesPage() {
 
   const handleDelete = async (id: number) => {
     setDeleteError(null);
+    setDeleting(true);
     try {
       await categoryApi.delete(id);
       await fetchCategories();
@@ -100,6 +102,7 @@ export function CategoriesPage() {
       setDeleteError(message);
     } finally {
       setDeleteConfirm(null);
+      setDeleting(false);
     }
   };
 
@@ -268,9 +271,14 @@ export function CategoriesPage() {
             {!deleteError && (
               <Button
                 variant="destructive"
+                disabled={deleting}
                 onClick={() => deleteConfirm && handleDelete(deleteConfirm)}
               >
-                Eliminar
+                {deleting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  "Eliminar"
+                )}
               </Button>
             )}
           </DialogFooter>
