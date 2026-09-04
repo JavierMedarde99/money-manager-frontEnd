@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { transactionApi } from "@/api/transaction";
 import { debtApi } from "@/api/debt";
 import { categoryApi } from "@/api/category";
+import { toBackendDate } from "@/lib/dateUtils";
 import type {
   TransactionResponseDTO,
   DebtResponseDTO,
@@ -60,7 +61,12 @@ export function DashboardPage() {
     async function load() {
       try {
         const [txData, fixedTxData, debtData, catData] = await Promise.all([
-          transactionApi.getAll({ page: 0, size: 200, from: monthFirstDay, to: monthLastDay }),
+          transactionApi.getAll({
+            page: 0,
+            size: 200,
+            from: toBackendDate(monthFirstDay),
+            to: toBackendDate(monthLastDay),
+          }),
           transactionApi.getAllFixed(),
           debtApi.getAll(),
           categoryApi.getAll(),
