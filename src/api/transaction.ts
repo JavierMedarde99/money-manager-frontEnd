@@ -25,12 +25,6 @@ export const transactionApi = {
     return apiClient.get(url).then((res) => res.data);
   },
 
-  getAllFixed(): Promise<TransactionResponseDTO[]> {
-    return apiClient
-      .get("/transaction/all?subType=FIXED&size=9999")
-      .then((res) => res.data.content);
-  },
-
   getById(id: number): Promise<TransactionResponseDTO> {
     return apiClient.get(`/transaction/${id}`).then((res) => res.data);
   },
