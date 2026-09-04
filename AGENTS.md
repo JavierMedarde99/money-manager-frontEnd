@@ -38,19 +38,18 @@ There is **no test runner** and **no formatter** configured.
 - `erasableSyntaxOnly` — no `enum`, use `const` objects + union types instead
 - Target: ES2023, JSX: react-jsx
 
-## Dates — backend uses `dd-MM-yyyy`
+## Dates — backend uses ISO `yyyy-MM-dd`
 
-The backend parses dates as `dd-MM-yyyy` (e.g. `19-08-2026`), but HTML
-`<input type="date">` and the dashboard month selector produce `yyyy-MM-dd`.
+The backend accepts and returns dates in ISO `yyyy-MM-dd` (e.g. `2026-08-19`),
+matching HTML `<input type="date">` and the dashboard month selector as-is.
 
-- Import helpers from `src/lib/dateUtils.ts`: `toBackendDate()` (ISO → backend)
-  and `fromBackendDate()` (backend → ISO). **Use `toBackendDate()` for any
-  date sent to the API** (request bodies and `from`/`to` query params), or the
-  backend rejects/fails to filter.
-- Transaction create/update with an unconverted ISO date fails with
-  `"invalid date format"`.
-- The dashboard must pass `from`/`to` converted to `dd-MM-yyyy` — otherwise the
-  month/year filter is ignored and transactions from all months appear together.
+- Send `transactionDate`, and `from`/`to` query params, in `yyyy-MM-dd`.
+  Sending `dd-MM-yyyy` causes HTTP 400 (`"invalid date format, expected
+  yyyy-MM-dd"`) — do **not** convert dates before sending.
+- The dashboard passes `from`/`to` as `yyyy-MM-dd` so the backend filters by the
+  selected month correctly.
+- There is no `dateUtils.ts` — it was removed because its ISO→`dd-MM-yyyy`
+  conversion broke the date filter.
 
 ## Styling
 
@@ -79,7 +78,7 @@ src/
   components/   # ui/ (reusable), layout/ (Sidebar, MainLayout, ProtectedRoute), ErrorBoundary.tsx
   pages/        # One file per route: Login, Register, Dashboard, Transactions, Categories, Debts, Profile
   types/        # TypeScript interfaces mirroring backend DTOs
-  lib/          # cn() utility + dateUtils (date conversion)
+  lib/          # cn() utility
 ```
 
 Routes (in `App.tsx`): `/login`, `/register` (public); `/`, `/transactions`, `/categories`, `/debts`, `/profile` (protected via `ProtectedRoute` → `MainLayout` with Sidebar).
