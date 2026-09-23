@@ -17,6 +17,8 @@ export const transactionApi = {
     if (filters?.subType) params.append("subType", filters.subType);
     if (filters?.from) params.append("from", filters.from);
     if (filters?.to) params.append("to", filters.to);
+    if (filters?.sortBy) params.append("sortBy", filters.sortBy);
+    if (filters?.direction) params.append("direction", filters.direction);
     if (filters?.page !== undefined) params.append("page", String(filters.page));
     if (filters?.size !== undefined) params.append("size", String(filters.size));
 
