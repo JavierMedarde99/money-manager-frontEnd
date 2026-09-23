@@ -102,6 +102,8 @@ export interface TransactionFilters {
   subType?: string;
   from?: string;
   to?: string;
+  sortBy?: string;
+  direction?: "ASC" | "DESC";
   page?: number;
   size?: number;
 }

@@ -36,6 +36,9 @@ import {
   Trash2,
   Loader2,
   ArrowRightLeft,
+  ArrowUp,
+  ArrowDown,
+  ArrowUpDown,
   Filter,
   X,
   AlertCircle,
@@ -51,6 +54,49 @@ const TRANSACTION_SUBTYPES = [
   { value: "FIXED", label: "Fijo" },
   { value: "VARIABLE", label: "Variable" },
 ];
+
+interface SortableHeaderProps {
+  label: string;
+  sortKey: string;
+  sortBy?: string;
+  direction?: "ASC" | "DESC";
+  className?: string;
+  onSort: (col: string) => void;
+}
+
+function SortableHeader({
+  label,
+  sortKey,
+  sortBy,
+  direction,
+  className,
+  onSort,
+}: SortableHeaderProps) {
+  const active = sortBy === sortKey;
+  const rightAligned = className?.includes("text-right");
+  return (
+    <TableHead className={className}>
+      <button
+        type="button"
+        onClick={() => onSort(sortKey)}
+        className={`inline-flex items-center gap-1 font-bold hover:text-card-foreground transition-colors ${
+          rightAligned ? "justify-end w-full" : ""
+        }`}
+      >
+        {label}
+        {active ? (
+          direction === "ASC" ? (
+            <ArrowUp className="h-3.5 w-3.5" />
+          ) : (
+            <ArrowDown className="h-3.5 w-3.5" />
+          )
+        ) : (
+          <ArrowUpDown className="h-3.5 w-3.5 opacity-50" />
+        )}
+      </button>
+    </TableHead>
+  );
+}
 
 export function TransactionsPage() {
   const navigate = useNavigate();
@@ -196,6 +242,18 @@ export function TransactionsPage() {
     }));
   };
 
+  const handleSort = (col: string) => {
+    setFilters((prev) => {
+      const sameCol = prev.sortBy === col;
+      return {
+        ...prev,
+        sortBy: col,
+        direction: sameCol ? (prev.direction === "ASC" ? "DESC" : "ASC") : "ASC",
+        page: 0,
+      };
+    });
+  };
+
   const clearFilters = () => {
     setFilters({ page: 0, size: 10 });
   };
@@ -306,13 +364,57 @@ export function TransactionsPage() {
             <Table className="min-w-[800px]">
             <TableHeader>
               <TableRow>
-                <TableHead>Nombre</TableHead>
-                <TableHead>Fecha</TableHead>
-                <TableHead>Tipo</TableHead>
-                <TableHead>Subtipo</TableHead>
-                <TableHead>Categoría</TableHead>
-                <TableHead className="text-right">Cantidad</TableHead>
-                <TableHead className="text-right">Precio</TableHead>
+                <SortableHeader
+                  label="Nombre"
+                  sortKey="name"
+                  sortBy={filters.sortBy}
+                  direction={filters.direction}
+                  onSort={handleSort}
+                />
+                <SortableHeader
+                  label="Fecha"
+                  sortKey="transactionDate"
+                  sortBy={filters.sortBy}
+                  direction={filters.direction}
+                  onSort={handleSort}
+                />
+                <SortableHeader
+                  label="Tipo"
+                  sortKey="transactionType"
+                  sortBy={filters.sortBy}
+                  direction={filters.direction}
+                  onSort={handleSort}
+                />
+                <SortableHeader
+                  label="Subtipo"
+                  sortKey="transactionSubtype"
+                  sortBy={filters.sortBy}
+                  direction={filters.direction}
+                  onSort={handleSort}
+                />
+                <SortableHeader
+                  label="Categoría"
+                  sortKey="category"
+                  sortBy={filters.sortBy}
+                  direction={filters.direction}
+                  onSort={handleSort}
+                />
+                <SortableHeader
+                  label="Cantidad"
+                  sortKey="amount"
+                  sortBy={filters.sortBy}
+                  direction={filters.direction}
+                  onSort={handleSort}
+                  className="text-right"
+                />
+                <SortableHeader
+                  label="Precio"
+                  sortKey="price"
+                  sortBy={filters.sortBy}
+                  direction={filters.direction}
+                  onSort={handleSort}
+                  className="text-right"
+                />
                 <TableHead className="text-right">Acciones</TableHead>
               </TableRow>
             </TableHeader>
