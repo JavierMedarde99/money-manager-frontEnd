@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import {
@@ -148,9 +149,8 @@ export function ProfilePage() {
               <Label htmlFor="password">Nueva contraseña (opcional)</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
+                <PasswordInput
                   id="password"
-                  type="password"
                   placeholder="Dejar vacío para no cambiar"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
