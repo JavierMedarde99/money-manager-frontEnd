@@ -242,6 +242,14 @@ export function TransactionsPage() {
     }));
   };
 
+  const handleCategoryFilterChange = (value: string) => {
+    setFilters((prev) => ({
+      ...prev,
+      category: value ? Number(value) : undefined,
+      page: 0,
+    }));
+  };
+
   const handleSort = (col: string) => {
     setFilters((prev) => {
       const sameCol = prev.sortBy === col;
@@ -258,7 +266,9 @@ export function TransactionsPage() {
     setFilters({ page: 0, size: 10 });
   };
 
-  const hasActiveFilters = filters.type || filters.subType || filters.from || filters.to;
+  const hasActiveFilters = Boolean(
+    filters.type || filters.subType || filters.from || filters.to || filters.category
+  );
 
   return (
     <div className="animate-bounce-in space-y-6">
@@ -304,7 +314,7 @@ export function TransactionsPage() {
               </Button>
             )}
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="space-y-1">
               <Label className="text-xs">Tipo</Label>
               <Select
@@ -337,6 +347,18 @@ export function TransactionsPage() {
                 type="date"
                 value={filters.to || ""}
                 onChange={(e) => handleFilterChange("to", e.target.value)}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs">Categoría</Label>
+              <Select
+                options={categories.map((c) => ({
+                  value: String(c.id),
+                  label: c.name,
+                }))}
+                placeholder="Todas"
+                value={filters.category ? String(filters.category) : ""}
+                onChange={(e) => handleCategoryFilterChange(e.target.value)}
               />
             </div>
           </div>
