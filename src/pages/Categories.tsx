@@ -11,15 +11,17 @@ import {
   TableRow,
   TableHead,
   TableCell,
-} from "@/components/ui/table";
-import {
+} from "@/components/ui/table";import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Loader2, Palette } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { CandyLoader } from "@/components/layout/CandyLoader";
+import { EmptyState } from "@/components/layout/EmptyState";
+import { Plus, Pencil, Trash2, Loader2, Palette, FolderOpen } from "lucide-react";
 
 export function CategoriesPage() {
   const [categories, setCategories] = useState<CategoryResponseDTO[]>([]);
@@ -107,36 +109,30 @@ export function CategoriesPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <CandyLoader />;
   }
 
   return (
     <div className="animate-bounce-in space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-card-foreground">
-            Categorías
-          </h1>
-          <p className="text-muted-foreground">
-            Administra las categorías de tus transacciones
-          </p>
-        </div>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          Nueva Categoría
-        </Button>
-      </div>
+      <PageHeader
+        title="Categorías"
+        subtitle="Administra las categorías de tus transacciones"
+        icon={FolderOpen}
+        iconClass="bg-secondary-100 text-secondary"
+        actions={
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4" />
+            Nueva Categoría
+          </Button>
+        }
+      />
 
       {categories.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <Palette className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>No hay categorías creadas</p>
-          <p className="text-sm">Crea tu primera categoría para empezar</p>
-        </div>
+        <EmptyState
+          icon={Palette}
+          title="No hay categorías creadas"
+          hint="Crea tu primera categoría para empezar"
+        />
       ) : (
         <div className="overflow-x-auto">
           <Table>
@@ -152,7 +148,7 @@ export function CategoriesPage() {
               <TableRow key={cat.id}>
                 <TableCell>
                   <div
-                    className="h-8 w-8 rounded-full shadow-md"
+                    className="h-8 w-8 rounded-full shadow-md ring-2 ring-white"
                     style={{ backgroundColor: cat.color }}
                   />
                 </TableCell>

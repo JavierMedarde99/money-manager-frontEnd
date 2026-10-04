@@ -30,6 +30,9 @@ import {
 } from "@/components/ui/dialog";
 import { Card } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { CandyLoader } from "@/components/layout/CandyLoader";
+import { EmptyState } from "@/components/layout/EmptyState";
 import {
   Plus,
   Pencil,
@@ -264,32 +267,30 @@ export function DebtsPage() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <CandyLoader />;
   }
 
   return (
     <div className="animate-bounce-in space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-card-foreground">Deudas</h1>
-          <p className="text-muted-foreground">Controla tus deudas y pagos</p>
-        </div>
-        <Button onClick={openCreate}>
-          <Plus className="h-4 w-4" />
-          Nueva Deuda
-        </Button>
-      </div>
+      <PageHeader
+        title="Deudas"
+        subtitle="Controla tus deudas y pagos"
+        icon={CreditCard}
+        iconClass="bg-primary-100 text-primary"
+        actions={
+          <Button onClick={openCreate}>
+            <Plus className="h-4 w-4" />
+            Nueva Deuda
+          </Button>
+        }
+      />
 
       {debts.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <CreditCard className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>No hay deudas registradas</p>
-          <p className="text-sm">Registra tu primera deuda para empezar</p>
-        </div>
+        <EmptyState
+          icon={CreditCard}
+          title="No hay deudas registradas"
+          hint="Registra tu primera deuda para empezar"
+        />
       ) : (
         <div className="space-y-3">
           {debts.map((debt) => {
@@ -299,7 +300,7 @@ export function DebtsPage() {
             const isPaid = remaining <= 0;
 
             return (
-              <Card key={debt.id} className="overflow-hidden">
+              <Card key={debt.id} className="card-gloss overflow-hidden">
                 <div
                   className="flex items-center gap-4 p-4 cursor-pointer hover:bg-muted/30 transition-colors"
                   onClick={() => toggleExpand(debt.id)}
@@ -337,7 +338,9 @@ export function DebtsPage() {
                           className="h-full rounded-full transition-all duration-500"
                           style={{
                             width: `${progress}%`,
-                            backgroundColor: isPaid ? "#22c55e" : "#e040a0",
+                            background: isPaid
+                              ? "linear-gradient(90deg, #22c55e, #16a34a)"
+                              : "linear-gradient(90deg, #e040a0, #7c52aa)",
                           }}
                         />
                       </div>

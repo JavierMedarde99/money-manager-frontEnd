@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* Candy — Joyful Pop */
+  /* Candy 2.0 — Soft Pop */
   --color-primary: #e040a0;
   --color-secondary: #7c52aa;
   --color-tertiary: #0096cc;
@@ -48,8 +48,8 @@
   --color-muted-foreground: #6b6375;
   --color-card: #ffffff;
   --color-card-foreground: #1a1125;
-  --color-border: #e8e0ee;
-  --color-input: #e8e0ee;
+  --color-border: #efe6f3;
+  --color-input: #efe6f3;
   --color-ring: #e040a0;
   --color-destructive: #ef4444;
   --color-destructive-foreground: #ffffff;
@@ -63,8 +63,9 @@
   --radius-xl: 20px;
   --radius-2xl: 16px;
 
-  /* Font */
+  /* Fonts: Baloo 2 for display, DM Sans for body */
   --font-sans: "DM Sans", system-ui, sans-serif;
+  --font-display: "Baloo 2", "DM Sans", system-ui, sans-serif;
 }
 
 @layer base {
@@ -77,11 +78,40 @@
     margin: 0;
     font-size: 16px;
     line-height: 1.6;
+    isolation: isolate;
   }
 
   h1, h2, h3, h4 {
     font-weight: 700;
     letter-spacing: -0.025em;
+  }
+
+  /* Ambient candy blobs — fixed behind everything */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: -15%;
+    z-index: -1;
+    pointer-events: none;
+    background:
+      radial-gradient(38% 48% at 12% 18%, rgba(224, 64, 160, 0.13), transparent 70%),
+      radial-gradient(42% 52% at 88% 12%, rgba(0, 150, 204, 0.11), transparent 70%),
+      radial-gradient(46% 56% at 82% 88%, rgba(124, 82, 170, 0.13), transparent 70%),
+      radial-gradient(34% 44% at 8% 92%, rgba(224, 64, 160, 0.09), transparent 70%),
+      radial-gradient(30% 40% at 55% 50%, rgba(0, 150, 204, 0.06), transparent 70%);
+    animation: candy-drift 26s ease-in-out infinite alternate;
+  }
+
+  /* Film grain overlay */
+  body::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 90;
+    pointer-events: none;
+    opacity: 0.032;
+    mix-blend-mode: soft-light;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E");
   }
 }
 
@@ -98,8 +128,35 @@
   100% { transform: scale(1); }
 }
 
+/* Slow ambient drift for background blobs */
+@keyframes candy-drift {
+  0% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(2%, -1.5%, 0) scale(1.04); }
+  100% { transform: translate3d(-1.5%, 2%, 0) scale(1.02); }
+}
+
+/* Gentle float for decorative blobs on panels */
+@keyframes float-slow {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-14px) scale(1.05); }
+}
+
+/* Staggered fade-up reveal */
+@keyframes fade-up {
+  0% { transform: translateY(14px); opacity: 0; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+
 .animate-bounce-in {
   animation: bounce-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+
+.animate-fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
 }
 
 .hover-bouncy {
@@ -122,6 +179,82 @@
 
 .shadow-tertiary {
   box-shadow: 0 4px 16px rgba(0, 150, 204, 0.2);
+}
+
+/* Soft layered card shadow — Candy 2.0 depth */
+.shadow-soft {
+  box-shadow:
+    0 1px 2px rgba(26, 17, 37, 0.04),
+    0 8px 24px rgba(224, 64, 160, 0.07),
+    0 20px 48px rgba(124, 82, 170, 0.06);
+}
+
+/* Gradient text — brand pink to purple */
+.text-gradient {
+  background: linear-gradient(120deg, #e040a0 10%, #7c52aa 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Gradient text — cool sky variant */
+.text-gradient-cool {
+  background: linear-gradient(120deg, #0096cc 10%, #7c52aa 90%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Primary gradient pill button */
+.btn-gradient {
+  background: linear-gradient(135deg, #e040a0 0%, #a63ec4 55%, #7c52aa 100%);
+  box-shadow: 0 6px 20px rgba(224, 64, 160, 0.35), 0 2px 6px rgba(124, 82, 170, 0.25);
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.3s ease,
+              filter 0.3s ease;
+}
+
+.btn-gradient:hover:not(:disabled) {
+  transform: scale(1.04);
+  filter: brightness(1.06);
+  box-shadow: 0 10px 28px rgba(224, 64, 160, 0.45), 0 4px 10px rgba(124, 82, 170, 0.3);
+}
+
+.btn-gradient:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* Glassy card with gradient hairline border */
+.card-gloss {
+  border: 1px solid transparent;
+  background:
+    linear-gradient(#ffffff, #ffffff) padding-box,
+    linear-gradient(135deg, rgba(224, 64, 160, 0.28), rgba(124, 82, 170, 0.14) 50%, rgba(0, 150, 204, 0.22)) border-box;
+}
+
+/* Deep sidebar gradient */
+.sidebar-gradient {
+  background: linear-gradient(180deg, #d63a96 0%, #a63ec4 48%, #7c52aa 78%, #5a317d 100%);
+}
+
+/* Hero panel gradient (balance card, auth panels) */
+.hero-gradient {
+  background: linear-gradient(120deg, #e040a0 0%, #c145c9 38%, #7c52aa 72%, #0096cc 125%);
+}
+
+/* Candy ring loader — conic gradient spinner */
+.candy-loader {
+  width: 42px;
+  height: 42px;
+  border-radius: 9999px;
+  background: conic-gradient(from 0deg, #e040a0, #7c52aa, #0096cc, #e040a0);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 5px), black calc(100% - 4px));
+  mask: radial-gradient(farthest-side, transparent calc(100% - 5px), black calc(100% - 4px));
+  animation: candy-spin 0.9s linear infinite;
+}
+
+@keyframes candy-spin {
+  to { transform: rotate(360deg); }
 }
 
 /* Color picker input reset */

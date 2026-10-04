@@ -30,6 +30,9 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Pagination } from "@/components/ui/pagination";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { CandyLoader } from "@/components/layout/CandyLoader";
+import { EmptyState } from "@/components/layout/EmptyState";
 import {
   Plus,
   Pencil,
@@ -44,7 +47,6 @@ import {
   AlertCircle,
   FolderOpen,
 } from "lucide-react";
-
 const TRANSACTION_TYPES = [
   { value: "INCOME", label: "Ingreso" },
   { value: "EXPENSE", label: "Gasto" },
@@ -272,39 +274,37 @@ export function TransactionsPage() {
 
   return (
     <div className="animate-bounce-in space-y-6">
-      <div className="flex items-center justify-between flex-wrap gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-card-foreground">
-            Transacciones
-          </h1>
-          <p className="text-muted-foreground">
-            Gestiona tus ingresos y gastos
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowFilters(!showFilters)}
-            className={hasActiveFilters ? "border-primary text-primary" : ""}
-          >
-            <Filter className="h-4 w-4" />
-            Filtros
-            {hasActiveFilters && (
-              <Badge variant="default" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
-                !
-              </Badge>
-            )}
-          </Button>
-          <Button onClick={openCreate}>
-            <Plus className="h-4 w-4" />
-            Nueva
-          </Button>
-        </div>
-      </div>
+      <PageHeader
+        title="Transacciones"
+        subtitle="Gestiona tus ingresos y gastos"
+        icon={ArrowRightLeft}
+        iconClass="bg-tertiary-100 text-tertiary"
+        actions={
+          <>
+            <Button
+              variant="outline"
+              onClick={() => setShowFilters(!showFilters)}
+              className={hasActiveFilters ? "border-primary text-primary" : ""}
+            >
+              <Filter className="h-4 w-4" />
+              Filtros
+              {hasActiveFilters && (
+                <Badge variant="default" className="ml-1 h-5 w-5 p-0 flex items-center justify-center text-[10px]">
+                  !
+                </Badge>
+              )}
+            </Button>
+            <Button onClick={openCreate}>
+              <Plus className="h-4 w-4" />
+              Nueva
+            </Button>
+          </>
+        }
+      />
 
       {/* Filters Panel */}
       {showFilters && (
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-primary animate-bounce-in">
+        <div className="card-gloss rounded-2xl p-4 shadow-soft animate-bounce-in">
           <div className="flex items-center justify-between mb-3">
             <h3 className="font-bold text-sm">Filtros de búsqueda</h3>
             {hasActiveFilters && (
@@ -367,19 +367,17 @@ export function TransactionsPage() {
 
       {/* Table */}
       {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        </div>
+        <CandyLoader />
       ) : !data || data.content.length === 0 ? (
-        <div className="text-center py-12 text-muted-foreground">
-          <ArrowRightLeft className="h-12 w-12 mx-auto mb-3 opacity-30" />
-          <p>No hay transacciones</p>
-          <p className="text-sm">
-            {hasActiveFilters
+        <EmptyState
+          icon={ArrowRightLeft}
+          title="No hay transacciones"
+          hint={
+            hasActiveFilters
               ? "Prueba a cambiar los filtros de búsqueda"
-              : "Crea tu primera transacción para empezar"}
-          </p>
-        </div>
+              : "Crea tu primera transacción para empezar"
+          }
+        />
       ) : (
         <>
           <div className="overflow-x-auto">
@@ -464,7 +462,7 @@ export function TransactionsPage() {
                   <TableCell>
                     <div className="flex items-center gap-2">
                       <div
-                        className="h-3 w-3 rounded-full"
+                        className="h-3 w-3 rounded-full ring-2 ring-white"
                         style={{ backgroundColor: tx.category.color }}
                       />
                       {tx.category.name}
