@@ -41,6 +41,9 @@ interface PieData {
   color: string;
 }
 
+const txTotal = (t: TransactionResponseDTO) =>
+  (t.amount ?? 1) * (t.price ?? 0);
+
 export function DashboardPage() {
   const navigate = useNavigate();
   const [transactions, setTransactions] = useState<TransactionResponseDTO[]>([]);
@@ -85,11 +88,11 @@ export function DashboardPage() {
 
   const totalIncome = transactions
     .filter((t) => t.transactionType.toUpperCase() === "INCOME")
-    .reduce((sum, t) => sum + (t.price || 0), 0);
+    .reduce((sum, t) => sum + txTotal(t), 0);
 
   const totalExpenses = transactions
     .filter((t) => t.transactionType.toUpperCase() === "EXPENSE")
-    .reduce((sum, t) => sum + (t.price || 0), 0);
+    .reduce((sum, t) => sum + txTotal(t), 0);
 
   const debtsThisMonth = debts.filter((d) =>
     d.payments?.content.some((p) => {
@@ -130,7 +133,7 @@ export function DashboardPage() {
           const key = t.category.name;
           if (!acc[key])
             acc[key] = { name: key, value: 0, color: t.category.color };
-          acc[key].value += Math.abs(t.price || 0);
+          acc[key].value += Math.abs(txTotal(t));
           return acc;
         },
         {} as Record<string, PieData>
@@ -145,7 +148,7 @@ export function DashboardPage() {
           const key = t.category.name;
           if (!acc[key])
             acc[key] = { name: key, value: 0, color: t.category.color };
-          acc[key].value += Math.abs(t.price || 0);
+          acc[key].value += Math.abs(txTotal(t));
           return acc;
         },
         {} as Record<string, PieData>
@@ -488,7 +491,7 @@ export function DashboardPage() {
                       {tx.transactionType.toUpperCase() === "INCOME"
                         ? "+"
                         : "-"}
-                      {tx.price?.toFixed(2)} €
+                      {txTotal(tx).toFixed(2)} €
                     </p>
                     <Badge
                       variant={
