@@ -11,13 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { CandyLoader } from "@/components/layout/CandyLoader";
 import {
   ArrowRightLeft,
   TrendingUp,
   TrendingDown,
   CreditCard,
   FolderOpen,
-  Loader2,
+  LayoutDashboard,
   ArrowUpRight,
   ArrowDownRight,
   Plus,
@@ -183,16 +185,14 @@ export function DashboardPage() {
       value: `${totalIncome.toFixed(2)} €`,
       icon: TrendingUp,
       color: "text-tertiary",
-      bg: "bg-tertiary-50",
-      shadow: "shadow-tertiary",
+      bg: "from-tertiary-400 to-tertiary-600",
     },
     {
       title: "Gastos totales",
       value: `${totalExpenses.toFixed(2)} €`,
       icon: TrendingDown,
       color: "text-primary",
-      bg: "bg-primary-50",
-      shadow: "shadow-primary",
+      bg: "from-primary-400 to-primary-600",
     },
     {
       title: currentDebt
@@ -203,8 +203,7 @@ export function DashboardPage() {
         : `${remainingDebt.toFixed(2)} €`,
       icon: CreditCard,
       color: "text-secondary",
-      bg: "bg-secondary-50",
-      shadow: "shadow-secondary",
+      bg: "from-secondary-400 to-secondary-600",
       onClick: remainingDebts.length > 1
         ? () => setSelectedDebtIndex((i) => (i + 1) % remainingDebts.length)
         : undefined,
@@ -214,62 +213,65 @@ export function DashboardPage() {
       value: String(categories.length),
       icon: FolderOpen,
       color: "text-primary",
-      bg: "bg-primary-50",
-      shadow: "shadow-primary",
+      bg: "from-primary-400 to-secondary-600",
     },
   ];
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    );
+    return <CandyLoader />;
   }
 
   return (
     <div className="animate-bounce-in space-y-8">
       {/* Header */}
-      <div>
-        <div className="flex items-center gap-2 sm:gap-3 mt-2 flex-wrap justify-center">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={goToPrevMonth}
-            className="h-8 w-8 rounded-full"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </Button>
-          <p className="text-muted-foreground font-medium min-w-0 sm:min-w-[180px] text-center">
-            Resumen de {selectedMonthName} {selectedYear}
-          </p>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={goToNextMonth}
-            className="h-8 w-8 rounded-full"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-          {!isCurrentMonth && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={goToCurrentMonth}
-              className="rounded-full text-xs"
-            >
-              Hoy
-            </Button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        title="Panel"
+        subtitle={`Resumen de ${selectedMonthName} ${selectedYear}`}
+        icon={LayoutDashboard}
+        iconClass="bg-primary-100 text-primary"
+        actions={
+          <>
+            <div className="flex items-center gap-1 rounded-full bg-card border border-border shadow-soft p-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={goToPrevMonth}
+                className="h-8 w-8"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm font-semibold px-2 min-w-[150px] text-center">
+                {selectedMonthName} {selectedYear}
+              </span>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={goToNextMonth}
+                className="h-8 w-8"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+            {!isCurrentMonth && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={goToCurrentMonth}
+                className="rounded-full text-xs"
+              >
+                Hoy
+              </Button>
+            )}
+          </>
+        }
+      />
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {stats.map((stat, index) => (
           <Card
             key={stat.title}
-            className={`${stat.shadow} ${stat.onClick ? "cursor-pointer hover:scale-[1.02] transition-transform" : ""}`}
+            className={`card-gloss ${stat.onClick ? "cursor-pointer" : ""}`}
             style={{ animationDelay: `${index * 100}ms` }}
             onClick={stat.onClick}
           >
@@ -279,10 +281,12 @@ export function DashboardPage() {
                   <p className="text-sm text-muted-foreground font-medium">
                     {stat.title}
                   </p>
-                  <p className="text-2xl font-bold mt-1">{stat.value}</p>
+                  <p className="font-display text-2xl font-bold mt-1">
+                    {stat.value}
+                  </p>
                 </div>
                 <div
-                  className={`h-12 w-12 rounded-2xl ${stat.bg} flex items-center justify-center`}
+                  className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${stat.bg} flex items-center justify-center shadow-soft`}
                 >
                   <stat.icon className={`h-6 w-6 ${stat.color}`} />
                 </div>
@@ -293,31 +297,39 @@ export function DashboardPage() {
       </div>
 
       {/* Net Balance Card */}
-      <Card className="shadow-primary">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+      <Card className="hero-gradient relative overflow-hidden border-0 shadow-primary">
+        {/* Decorative circles */}
+        <div className="absolute -top-10 -right-10 h-48 w-48 rounded-full bg-white/15 animate-float-slow" />
+        <div className="absolute -bottom-16 left-1/3 h-40 w-40 rounded-full bg-white/10 animate-float-slow" style={{ animationDelay: "1.4s" }} />
+        <div className="absolute top-6 right-1/4 h-6 w-6 rounded-full border-2 border-white/30 animate-float-slow" style={{ animationDelay: "0.7s" }} />
+        <CardContent className="p-6 relative">
+          <div className="flex items-center justify-between flex-wrap gap-4">
             <div>
-              <p className="text-sm text-muted-foreground font-medium">
+              <p className="text-sm text-white/70 font-semibold uppercase tracking-wider">
                 Balance neto
               </p>
-              <p
-                className={`text-4xl font-bold mt-1 ${
-                  totalIncome - totalExpenses >= 0
-                    ? "text-tertiary"
-                    : "text-primary"
-                }`}
-              >
+              <p className="font-display text-5xl font-bold mt-1 text-white">
                 {(totalIncome - totalExpenses).toFixed(2)} €
               </p>
             </div>
-            <div className="text-right">
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <ArrowUpRight className="h-4 w-4 text-tertiary" />
-                <span>{totalIncome.toFixed(2)} €</span>
+            <div className="flex gap-3">
+              <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-4 py-3">
+                <div className="flex items-center gap-2 text-sm text-white/80">
+                  <ArrowUpRight className="h-4 w-4 text-white" />
+                  <span>Ingresos</span>
+                </div>
+                <p className="font-display font-bold text-white text-lg">
+                  {totalIncome.toFixed(2)} €
+                </p>
               </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
-                <ArrowDownRight className="h-4 w-4 text-primary" />
-                <span>{totalExpenses.toFixed(2)} €</span>
+              <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-4 py-3">
+                <div className="flex items-center gap-2 text-sm text-white/80">
+                  <ArrowDownRight className="h-4 w-4 text-white" />
+                  <span>Gastos</span>
+                </div>
+                <p className="font-display font-bold text-white text-lg">
+                  {totalExpenses.toFixed(2)} €
+                </p>
               </div>
             </div>
           </div>
@@ -327,9 +339,9 @@ export function DashboardPage() {
       {/* Pie Charts: Income + Expenses */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Income Pie Chart */}
-        <Card className="shadow-tertiary">
+        <Card className="card-gloss">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 font-display">
               <TrendingUp className="h-5 w-5 text-tertiary" />
               Ingresos por categoría
             </CardTitle>
@@ -375,9 +387,9 @@ export function DashboardPage() {
         </Card>
 
         {/* Expenses Pie Chart */}
-        <Card className="shadow-primary">
+        <Card className="card-gloss">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
+            <CardTitle className="flex items-center gap-2 font-display">
               <TrendingDown className="h-5 w-5 text-primary" />
               Gastos por categoría
             </CardTitle>
@@ -424,9 +436,9 @@ export function DashboardPage() {
       </div>
 
       {/* Recent Transactions - Full Width */}
-      <Card className="shadow-primary">
+      <Card className="card-gloss">
         <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle>Transacciones recientes</CardTitle>
+          <CardTitle className="font-display">Transacciones recientes</CardTitle>
           <Button
             variant="ghost"
             size="sm"
@@ -499,9 +511,9 @@ export function DashboardPage() {
       </Card>
 
       {/* Quick Actions */}
-      <Card className="shadow-tertiary">
+      <Card className="card-gloss">
         <CardContent className="p-6">
-          <h3 className="font-bold text-card-foreground mb-4">
+          <h3 className="font-display font-bold text-card-foreground mb-4 text-lg">
             Acciones rápidas
           </h3>
           <div className="flex flex-wrap gap-3">

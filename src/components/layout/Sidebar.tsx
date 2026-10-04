@@ -42,20 +42,25 @@ export function Sidebar() {
     <div className="flex flex-col h-full overflow-y-auto overflow-x-hidden">
       {/* Header */}
       <div className="flex items-center gap-3 p-5">
-        <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center shadow-primary shrink-0">
+        <div className="h-11 w-11 rounded-2xl bg-white/15 backdrop-blur-md border border-white/25 flex items-center justify-center shadow-lg shrink-0">
           <DollarSign className="h-5 w-5 text-white" />
         </div>
         {!collapsed && (
-          <span className="text-lg font-bold text-primary whitespace-nowrap">
-            Money Manager
-          </span>
+          <div className="min-w-0">
+            <span className="font-display text-lg font-bold text-white whitespace-nowrap block leading-tight">
+              Money Manager
+            </span>
+            <span className="text-[11px] text-white/60 font-medium tracking-wide uppercase">
+              Candy 2.0
+            </span>
+          </div>
         )}
       </div>
 
-      <Separator className="mx-4" />
+      <Separator className="mx-4 bg-white/15" />
 
       {/* Nav */}
-      <nav className="flex-1 p-3 space-y-1">
+      <nav className="flex-1 p-3 space-y-1.5">
         {navItems.map((item) => (
           <NavLink
             key={item.to}
@@ -65,8 +70,8 @@ export function Sidebar() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-4 py-3 rounded-full text-sm font-semibold transition-all duration-300 ${
                 isActive
-                  ? "bg-primary text-white shadow-primary"
-                  : "text-muted-foreground hover:bg-muted hover:text-card-foreground"
+                  ? "bg-white/20 text-white shadow-lg backdrop-blur-md border border-white/25"
+                  : "text-white/75 hover:bg-white/10 hover:text-white border border-transparent"
               } ${collapsed ? "justify-center" : ""}`
             }
           >
@@ -76,7 +81,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <Separator className="mx-4" />
+      <Separator className="mx-4 bg-white/15" />
 
       {/* User section */}
       <div className={`p-4 flex items-center gap-3 ${collapsed ? "justify-center" : ""}`}>
@@ -84,17 +89,21 @@ export function Sidebar() {
           onClick={() => { navigate("/profile"); setMobileOpen(false); }}
           className={`flex items-center gap-3 ${collapsed ? "justify-center" : "flex-1 min-w-0"} group`}
         >
-          <Avatar className="h-9 w-9 shrink-0">
-            <AvatarFallback className="text-xs">{initials}</AvatarFallback>
+          <Avatar className="h-10 w-10 shrink-0 ring-2 ring-white/40">
+            <AvatarFallback className="text-xs bg-white/20 text-white">
+              {initials}
+            </AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-bold truncate group-hover:text-primary transition-colors">{user?.username}</p>
-              <p className="text-xs text-muted-foreground truncate">{user?.email}</p>
+              <p className="text-sm font-bold text-white truncate group-hover:text-primary-200 transition-colors">
+                {user?.username}
+              </p>
+              <p className="text-xs text-white/60 truncate">{user?.email}</p>
             </div>
           )}
           {!collapsed && (
-            <User className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0" />
+            <User className="h-4 w-4 text-white/60 group-hover:text-primary-200 transition-colors shrink-0" />
           )}
         </button>
         {!collapsed && (
@@ -102,7 +111,7 @@ export function Sidebar() {
             variant="ghost"
             size="icon"
             onClick={handleLogout}
-            className="shrink-0 text-muted-foreground hover:text-destructive"
+            className="shrink-0 text-white/70 hover:text-white hover:bg-white/10"
           >
             <LogOut className="h-4 w-4" />
           </Button>
@@ -131,26 +140,28 @@ export function Sidebar() {
 
       {/* Mobile sidebar */}
       <aside
-        className={`fixed top-0 left-0 z-[60] h-full w-64 bg-card border-r border-border transition-transform duration-300 lg:hidden ${
+        className={`fixed top-0 left-0 z-[60] h-full w-64 transition-transform duration-300 lg:hidden ${
           mobileOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
-        {sidebarContent}
+        <div className="sidebar-gradient h-full shadow-2xl">{sidebarContent}</div>
       </aside>
 
       {/* Desktop sidebar */}
       <aside
-        className={`hidden lg:flex flex-col fixed top-0 left-0 h-screen bg-card border-r border-border transition-all duration-300 z-[60] ${
+        className={`hidden lg:flex flex-col fixed top-0 left-0 h-screen transition-all duration-300 z-[60] ${
           collapsed ? "w-20" : "w-64"
         }`}
       >
-        {sidebarContent}
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="absolute -right-3 top-7 h-6 w-6 rounded-full bg-card border border-border shadow-md flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
-        >
-          <Menu className="h-3 w-3" />
-        </button>
+        <div className="sidebar-gradient h-full shadow-2xl">
+          {sidebarContent}
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="absolute -right-3 top-7 h-6 w-6 rounded-full bg-white border border-white/50 shadow-md flex items-center justify-center text-secondary hover:text-primary transition-colors"
+          >
+            <Menu className="h-3 w-3" />
+          </button>
+        </div>
       </aside>
     </>
   );

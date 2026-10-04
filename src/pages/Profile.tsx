@@ -21,6 +21,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { PageHeader } from "@/components/layout/PageHeader";
 import { User, Mail, Lock, Save, Trash2, Loader2 } from "lucide-react";
 
 export function ProfilePage() {
@@ -82,27 +83,40 @@ export function ProfilePage() {
 
   return (
     <div className="max-w-2xl mx-auto space-y-6 animate-bounce-in">
-      <h1 className="text-2xl font-bold">Mi Perfil</h1>
+      <PageHeader
+        title="Mi Perfil"
+        subtitle="Gestiona tu cuenta"
+        icon={User}
+        iconClass="bg-tertiary-100 text-tertiary"
+      />
 
       {/* Profile info */}
-      <Card>
-        <CardContent className="p-6">
+      <Card className="hero-gradient relative overflow-hidden border-0 shadow-primary">
+        <div className="absolute -top-8 -right-8 h-40 w-40 rounded-full bg-white/15 animate-float-slow" />
+        <div className="absolute -bottom-12 left-1/4 h-32 w-32 rounded-full bg-white/10 animate-float-slow" style={{ animationDelay: "1.3s" }} />
+        <CardContent className="p-6 relative">
           <div className="flex items-center gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="text-xl">{initials}</AvatarFallback>
+            <Avatar className="h-16 w-16 ring-4 ring-white/50">
+              <AvatarFallback className="text-xl bg-white/20 text-white">
+                {initials}
+              </AvatarFallback>
             </Avatar>
             <div>
-              <p className="text-lg font-bold">{user?.username}</p>
-              <p className="text-sm text-muted-foreground">{user?.email}</p>
+              <p className="font-display text-2xl font-bold text-white">
+                {user?.username}
+              </p>
+              <p className="text-sm text-white/80">{user?.email}</p>
             </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Edit form */}
-      <Card>
+      <Card className="card-gloss">
         <CardHeader>
-          <CardTitle>Editar información</CardTitle>
+          <CardTitle className="font-display text-xl">
+            Editar información
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleUpdate} className="space-y-4">
@@ -174,9 +188,9 @@ export function ProfilePage() {
       </Card>
 
       {/* Danger zone */}
-      <Card className="border-red-200">
+      <Card className="border-red-200 bg-red-50/40">
         <CardContent className="p-6">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             <div>
               <p className="font-bold text-red-600">Eliminar cuenta</p>
               <p className="text-sm text-muted-foreground">

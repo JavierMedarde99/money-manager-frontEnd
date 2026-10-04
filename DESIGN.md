@@ -1,33 +1,38 @@
-# Candy — Playful & Vibrant
+# Candy 2.0 — Soft Pop
 
-## North Star: "Joyful Pop"
-Bold, fun, and energetic. Saturated colors, pill-shaped elements, and bouncy microinteractions. Designed to delight.
+## North Star: "Joyful, but polished"
+The original Candy identity (saturated color, pill shapes, bouncy motion) leveled up with atmosphere: ambient gradient blobs, film grain, glassy panels and a display typeface with personality. Delight with depth, not just brightness.
 
 ## Colors
 - **Primary (`#e040a0`):** Hot pink — primary actions and brand identity.
 - **Secondary (`#7c52aa`):** Purple — secondary elements, tags, categories.
 - **Tertiary (`#0096cc`):** Sky blue — informational, links, highlights.
-- **Background (`#fef7ff`):** Very light pink-white — warm and playful.
-- Use all three accent colors freely but with purpose. This palette is expressive.
+- **Background (`#fef7ff`):** Very light pink-white, layered with fixed ambient radial blobs (pink / purple / sky) that drift slowly, plus a 3% film-grain overlay.
+- Gradients are first-class: `hero-gradient` (panels, balance card), `sidebar-gradient` (navigation), `btn-gradient` (primary button), `text-gradient` (headlines).
 
 ## Typography
-- **All fonts:** DM Sans — rounded, friendly, modern.
-- Use bold weight for headings, medium for labels. Generous line-height.
-- Slightly larger base size (16px body) for friendliness.
+- **Display:** Baloo 2 — rounded, characterful, used for headings and big numbers (`font-display`).
+- **Body:** DM Sans — rounded, friendly, modern.
+- Bold weight for headings, medium for labels. Generous line-height. 16px base.
 
 ## Shapes & Motion
 - **Border radius:** Full/pill on buttons and badges. 16-20px on cards.
-- **Microinteractions:** Bouncy hover transitions (`transform: scale(1.03)`, spring-like timing).
-- **Shadows:** Colorful — use tinted shadows matching the element color at 15-20% opacity.
-  Example: pink button gets `box-shadow: 0 4px 16px rgba(224, 64, 160, 0.2)`.
+- **Microinteractions:** Bouncy hover transitions (`transform: scale(1.03)`, spring-like cubic-bezier).
+- **Shadows:** Layered and tinted — `shadow-soft` for cards (neutral + pink + purple layers), `shadow-primary/secondary/tertiary` for tinted glows.
+- **Reveal:** `animate-fade-up` with staggered `animation-delay` for page content; `animate-float-slow` for decorative blobs.
 
 ## Components
-- **Buttons:** Pill-shaped, solid fill, tinted shadow. Hover = slight scale + deeper shadow.
-- **Cards:** Large radius (16px), white fill, tinted shadow. Hover = lift animation.
-- **Badges/Tags:** Pill-shaped, pastel fill (`primary_fixed`), bold text.
+- **Buttons:** Pill-shaped. Default is the pink→purple `btn-gradient` with a deep tinted shadow; hover = scale + brightness.
+- **Cards:** White fill with `card-gloss` gradient hairline border option, layered `shadow-soft`, hover lift.
+- **Sidebar:** Deep pink→purple gradient, white text, glassy active pill (`bg-white/20` + backdrop blur).
+- **Badges/Tags:** Pill-shaped, pastel fill with inset ring.
 - **Inputs:** Rounded (full radius), light fill, pink focus ring.
+- **Loader:** `CandyLoader` — conic-gradient ring (pink → purple → sky).
+- **Empty states:** `EmptyState` — icon inside a floating gradient blob.
+- **Page headers:** `PageHeader` — gradient display title, colored icon chip, action slot.
 
 ## Rules
 - Embrace color contrast and saturation. Nothing should feel washed out.
 - Rounded shapes everywhere — no sharp corners in this system.
 - Animations should feel bouncy and playful, not stiff. Use ease-out curves.
+- Ambient decoration (blobs, grain) must stay behind content and never capture pointer events.
