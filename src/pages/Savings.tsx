@@ -2,7 +2,17 @@ import { useState, useEffect, useCallback } from "react";
 import { savingsApi } from "@/api/savings";
 import type { SavingsResponseDTO } from "@/types";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { EmptyState } from "@/components/layout/EmptyState";
@@ -14,6 +24,21 @@ import {
   TrendingDown,
   Calculator,
 } from "lucide-react";
+
+const MONTH_NAMES = [
+  "Enero",
+  "Febrero",
+  "Marzo",
+  "Abril",
+  "Mayo",
+  "Junio",
+  "Julio",
+  "Agosto",
+  "Septiembre",
+  "Octubre",
+  "Noviembre",
+  "Diciembre",
+];
 
 export function SavingsPage() {
   const [savings, setSavings] = useState<SavingsResponseDTO[]>([]);
@@ -154,6 +179,7 @@ export function SavingsPage() {
           hint="Registra ingresos y gastos para ver tu ahorro aquí"
         />
       ) : (
+        <>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {summaryCards.map((card) => (
             <Card key={card.label} className="card-gloss">
@@ -177,6 +203,69 @@ export function SavingsPage() {
             </Card>
           ))}
         </div>
+
+        <Card className="card-gloss">
+          <CardHeader>
+            <CardTitle className="font-display">
+              Ahorro por mes — {year}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {yearMonths.length === 0 ? (
+              <EmptyState
+                icon={PiggyBank}
+                title="Sin datos de ahorros"
+                hint={`No hay registros para ${year}`}
+              />
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Mes</TableHead>
+                    <TableHead className="text-right">Ingresos</TableHead>
+                    <TableHead className="text-right">Gastos</TableHead>
+                    <TableHead className="text-right">Ahorro</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {yearMonths.map((s) => (
+                    <TableRow key={`${s.year}-${s.month}`}>
+                      <TableCell className="font-semibold">
+                        <div className="flex items-center gap-2">
+                          {MONTH_NAMES[s.month - 1]}
+                          {s.year === currentYear &&
+                            s.month === now.getMonth() + 1 && (
+                              <Badge
+                                variant="secondary"
+                                className="text-[10px]"
+                              >
+                                Actual
+                              </Badge>
+                            )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {s.totalIncome.toFixed(2)} €
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {s.totalExpense.toFixed(2)} €
+                      </TableCell>
+                      <TableCell
+                        className={cn(
+                          "text-right font-semibold",
+                          s.savings < 0 && "text-primary"
+                        )}
+                      >
+                        {s.savings.toFixed(2)} €
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+        </>
       )}
     </div>
   );
