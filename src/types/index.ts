@@ -108,3 +108,11 @@ export interface TransactionFilters {
   page?: number;
   size?: number;
 }
+
+export interface SavingsResponseDTO {
+  year: number;
+  month: number;
+  totalIncome: number;
+  totalExpense: number;
+  savings: number;
+}
