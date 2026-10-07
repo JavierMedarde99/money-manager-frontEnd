@@ -1,7 +1,7 @@
 # SDD — Página de Ahorros (integración `GET /savings`)
 
 - **Fecha:** 2026-10-07
-- **Estado:** BORRADOR — pendiente de respuesta a las preguntas abiertas (§7)
+- **Estado:** RESUELTA — respuestas incorporadas en §7; **pendiente de aprobación** para pasar a `writing-plans`
 - **Issue:** #121
 - **Refs:**
   - Swagger UI: https://expense-manager-new.onrender.com/swagger-ui/index.html
@@ -14,7 +14,7 @@
 
 Añadir una nueva página protegida para **ver los ahorros** del usuario, alimentada por la nueva integración del backend `GET /savings`, que devuelve el ahorro mensual agregado (ingresos, gastos y ahorro por año/mes).
 
-El backend expone **solo lectura**: no hay endpoints de creación/edición/borrado de ahorros. La primera versión es, por tanto, una página de visualización.
+El backend expone **solo lectura**: no hay endpoints de creación/edición/borrado de ahorros. La primera versión es, por tanto, una página de visualización (Q-08).
 
 ## 2. Análisis de la API nueva
 
@@ -24,24 +24,25 @@ El backend expone **solo lectura**: no hay endpoints de creación/edición/borra
 |---|---|---|---|---|
 | `GET` | `/savings` | `getSavings` (controller: `savings-controller`) | ninguno | `200 → SavingsResponseDTO[]` |
 
-También aparece un nuevo `GET /health` (`health-controller`) → `Map<string, string>`; fuera del alcance de esta página, ver Q-21.
+Disponible en **desarrollo local y producción** (Q-18). El nuevo `GET /health` **no se usará en el frontend** (Q-21).
 
 ### 2.2 Schema `SavingsResponseDTO`
 
 | Campo | Tipo | Notas |
 |---|---|---|
 | `year` | `integer (int32)` | Año del registro |
-| `month` | `integer (int32)` | Mes — **convención sin definir** (¿1–12 o 0–11?) → Q-01 |
+| `month` | `integer (int32)` | Mes **1–12** (Enero = 1) — confirmado (Q-01) |
 | `totalIncome` | `number (double)` | Ingresos totales del mes |
 | `totalExpense` | `number (double)` | Gastos totales del mes |
-| `savings` | `number (double)` | Ahorro del mes — fórmula sin confirmar → Q-02 |
+| `savings` | `number (double)` | Ahorro del mes = `totalIncome − totalExpense` (Q-02); **puede ser negativo** |
 
 ### 2.3 Observaciones
 
 - **Solo lectura:** no existe `POST/PUT/DELETE /savings`.
 - **Sin paginación, sin filtros, sin query params:** el `200` devuelve un array completo. A diferencia de `/debt/all` y `/transaction/all`, no hay `page`/`size`.
 - **Sin `id`:** la identidad natural de un registro es `(year, month)`.
-- No consta información de seguridad/schemes en el OpenAPI descargado; el resto de la API usa Bearer (ver Q-19).
+- **Cobertura:** solo devuelve meses con datos registrados (Q-03) y el **histórico completo** desde el inicio (Q-04) — un registro por `(year, month)`, sin duplicados (A5).
+- Autenticación Bearer vía interceptor, igual que el resto de la API (Q-19).
 - Mensajes de error en español y moneda EUR (€), según peculiaridades conocidas del backend.
 
 ## 3. Estado actual del frontend (patrones a seguir)
@@ -52,11 +53,9 @@ También aparece un nuevo `GET /health` (`health-controller`) → `Map<string, s
 - **Navegación:** array `navItems` en `src/components/layout/Sidebar.tsx` (`{ to, label, icon }`, iconos lucide).
 - **Página:** componentes de layout Candy 2.0 — `PageHeader` (título/subtítulo/icono/acciones), `EmptyState` (vacíos), `CandyLoader` (carga), tabla con `src/components/ui/table`, tarjetas con `Card`.
 - **Estilo:** Tailwind v4 CSS-first (`src/index.css`), radius píldora, animaciones `animate-bounce-in`/`animate-fade-up`, importes con `.toFixed(2)} €`.
-- **Sin test runner ni formatter:** verificación con `npm run build` (tsc + vite) y `npm run lint` (oxlint) → Q-23.
+- **Sin test runner ni formatter:** verificación con `npm run build` (tsc + vite) y `npm run lint` (oxlint) + prueba manual (Q-23).
 
 ## 4. Propuesta de diseño
-
-> Sujeta a respuestas de §7; las opciones marcadas como «por defecto» son las recomendadas.
 
 ### 4.1 Archivos
 
@@ -66,7 +65,7 @@ También aparece un nuevo `GET /health` (`health-controller`) → `Map<string, s
 | `src/api/savings.ts` | crear | `savingsApi.getAll(): Promise<SavingsResponseDTO[]>` → `GET /savings` |
 | `src/pages/Savings.tsx` | crear | Página `SavingsPage` |
 | `src/App.tsx` | modificar | Ruta protegida `/savings` → `SavingsPage` |
-| `src/components/layout/Sidebar.tsx` | modificar | Nav item `{ to: "/savings", label: "Ahorros", icon: PiggyBank }` (icono provisional → Q-13) |
+| `src/components/layout/Sidebar.tsx` | modificar | Nav item `{ to: "/savings", label: "Ahorros", icon: PiggyBank }` (Q-13) |
 
 ### 4.2 Flujo de datos
 
@@ -74,106 +73,113 @@ También aparece un nuevo `GET /health` (`health-controller`) → `Map<string, s
 mount ─→ savingsApi.getAll() ─→ setSavings([])
                 │
                 ├─ loading → <CandyLoader />
-                ├─ error   → mensaje de error en español (reintento)
+                ├─ error   → «Error al cargar los ahorros» (mensaje genérico, Q-20)
                 └─ ok      → derivar en cliente:
-                              • filtrar por año seleccionado (si aplica, Q-09)
-                              • ordenar por (year, month) (Q-04)
-                              • resúmenes: ahorro total, media mensual…
-                              • tabla/gráfico de evolución
+                              • años disponibles = años únicos del array
+                              • filtrar por año seleccionado (Q-09)
+                              • ordenar por month 1–12 (Q-01)
+                              • resúmenes: ahorro total, ingresos, gastos, media mensual
+                              • tabla de meses del año
 ```
 
-Todo el cálculo derivado se hace en cliente (mismo patrón que el Dashboard); no hay estado global, solo `useState`/`useEffect` local → Q-22.
+Todo el cálculo derivado se hace en cliente con `useState` local (Q-22), mismo patrón que el Dashboard; sin estado global.
 
-### 4.3 UI (por defecto, a confirmar con Q-14…Q-17)
+### 4.3 UI (definitiva según respuestas)
 
-1. `PageHeader` — título «Ahorros», subtítulo con año, icono, acciones (selector de año si aplica).
-2. Fila de tarjetas `Card` resumen: ahorro total del periodo, ingresos, gastos, media mensual.
-3. Tabla de meses (año, mes, ingresos, gastos, ahorro) usando `Table`, orden descendente por año/mes; ahorro negativo en color `text-primary` (rojo del tema) → Q-15.
-4. Opcional: gráfico de barras/línea de evolución con `recharts` (ya en dependencias) → Q-12.
-5. Estados: `CandyLoader` (carga), `EmptyState` (sin datos), mensaje de error con botón reintentar.
+1. `PageHeader` — título «Ahorros», subtítulo con el año seleccionado, icono `PiggyBank`, acciones = **selector de año** «← 2026 →» con botón «Hoy» (Q-09), análogo al selector de meses del Panel.
+2. Fila de tarjetas `Card` resumen del año seleccionado: ahorro total, ingresos totales, gastos totales, media mensual del ahorro.
+3. **Tabla única** de meses del año (año, mes, ingresos, gastos, ahorro) — nunca secciones por año (Q-17); solo aparecen los meses con datos (Q-03):
+   - mes en curso con badge «Actual» (Q-16);
+   - ahorro negativo en rojo (`text-primary`) con signo − (Q-15).
+4. Estados: `CandyLoader` (carga), `EmptyState` (año sin datos), error con texto genérico + reintento (Q-20).
+5. Sin gráfico de evolución (Q-12) ni exportación (Q-11).
 
 ### 4.4 Manejo de errores
 
 - `401` → ya resuelto por el interceptor (auto-logout + redirect a `/login`).
-- `403` con body vacío → problema conocido del backend; el interceptor no lo maneja → Q-20.
-- Errores de red/500 → mostrar texto de la API (español) o fallback «Error al cargar los ahorros».
+- `403` con body vacío (problema conocido del backend) → **mensaje genérico en esta página**; el arreglo del interceptor queda como issue aparte (Q-20).
+- Errores de red/500 → «Error al cargar los ahorros» con botón de reintento.
 
 ### 4.5 Verificación
 
-- `npm run build` y `npm run lint` sin errores/warnings nuevos.
-- Prueba manual con backend corriendo (¿local o prod? → Q-24).
-- Revisión de cálculos derivados con datos reales (cuadre con Dashboard → Q-05).
+- `npm run build` y `npm run lint` sin errores ni warnings nuevos.
+- Prueba manual **contra producción** con datos reales (Q-24).
+- **Cuadre con el Dashboard (Q-05):** para al menos un mes, comparar los totales de `/savings` con los que calcula el Panel (`Σ cantidad × precio`); si discrepan, es bug → investigar antes de cerrar.
 
 ## 5. Suposiciones explícitas
 
-- **A1:** El endpoint ya está desplegado y respondiendo tanto en prod como en `localhost:8080` (→ Q-18).
-- **A2:** Los datos son **del usuario autenticado** (el token via interceptor), no globales.
-- **A3:** `savings` lo calcula el backend; el frontend **no** recalcula (si cuadra con `totalIncome - totalExpense`, se valida en QA, no se reimplementa).
-- **A4:** La página es de solo lectura en esta versión (la API no permite escribir).
+- **A1:** `GET /savings` responde en local y prod (confirmado, Q-18).
+- **A2:** Los datos son **del usuario autenticado** (token vía interceptor), no globales (Q-07).
+- **A3:** `savings` lo calcula el backend (`income − expense`, Q-02); el frontend solo lo lee y formatea.
+- **A4:** La página es de solo lectura (Q-08; la API no permite escribir).
 - **A5:** Un registro por `(year, month)`; no hay duplicados.
+- **A6:** Campos no nulos — aún así, el acceso usa `??` defensivo (`?? 1`/`?? 0` solo donde aporte, aquí todos los campos son numéricos y se asumen presentes; Q-06).
+- **A7:** Auth Bearer estándar sin roles especiales (Q-19).
 
 ## 6. Fuera de alcance (primera versión)
 
-- Crear/editar/borrar ahorros o fijar metas (no hay endpoint).
-- Modificar el Dashboard para usar `/savings` (pendiente de Q-10).
-- Exportación CSV/PDF (pendiente de Q-11).
-- Añadir test runner (Vitest) al proyecto (pendiente de Q-23).
-- Consumir `GET /health` (pendiente de Q-21).
+- Crear/editar/borrado de ahorros o metas (no hay endpoint; Q-08).
+- **Migrar el Dashboard a `/savings`** — el Dashboard sigue calculando en cliente (Q-10); queda para un issue futuro si se decide.
+- Exportación CSV/PDF (Q-11).
+- Gráfico de evolución (Q-12).
+- **`GET /health` no se usará nunca en el frontend** (Q-21).
+- Arreglar el manejo de `403` con body vacío en el interceptor (Q-20 → issue aparte).
+- Añadir test runner (Vitest) (Q-23).
 
-## 7. Preguntas abiertas (necesarias para implementar)
+## 7. Preguntas y respuestas
 
-> Responder con el identificador (ej. «Q-01: 1–12»). Las secciones están ordenadas por bloqueo: cuanto antes se respondan, menos re-trabajo.
+> Resueltas el 2026-10-07. Las no formuladas se resolvieron como supuestos (§5) o hechos de la API (§2).
 
 ### A. Semántica de datos
 
-- **Q-01 — Convención de `month`:** ¿el backend devuelve `month` en rango **1–12** (mes ES) o **0–11** (índice JS)? Afecta al nombre mostrado y a cualquier orden/filtrado. ¿Y `year` es siempre un año válido?
-- **Q-02 — Fórmula de `savings`:** ¿es exactamente `totalIncome - totalExpense`? ¿O el backend descuenta además cuotas/pagos de deudas u otras consideraciones? ¿Puede venir **negativo** (mes con más gasto que ingreso)?
-- **Q-03 — Cobertura temporal:** ¿el array incluye **solo meses con movimientos**, o también el mes actual a medio cerrar y **meses futuros** sin datos? ¿Incluye meses con ingresos/gastos a cero?
-- **Q-04 — Volumen y orden:** ¿cuántos años de histórico devuelve (¿todo el histórico, limitado)? ¿Viene ordenado? ¿Qué orden devuelve y en qué orden debe mostrarlo la tabla? ¿Hace falta limitar/paginar en frontend?
-- **Q-05 — Cuadre con el Dashboard:** ¿`totalIncome`/`totalExpense` de un mes coinciden con los totales que el Dashboard calcula en cliente (`Σ amount × price` de sus transacciones) para ese mismo mes? Hay que saberlo para evitar cifras contradictorias en la app (nota: `AGENTS.md` documenta que el backend ha rechazado `transactionType: EXPENSE` en transacciones — verificar cómo calcula `totalExpense`).
-- **Q-06 — Nulos / campos opcionales:** ¿algún campo puede venir `null` o ausente (p. ej. un mes con solo ingresos), o son siempre números?
-- **Q-07 — Alcance por usuario:** ¿`GET /savings` devuelve los ahorros **del usuario del token** o datos globales?
+- **Q-01 — Convención de `month`:** → **1–12** (Enero = 1).
+- **Q-02 — Fórmula de `savings`:** → **`totalIncome − totalExpense` exactamente**; puede venir negativo.
+- **Q-03 — Cobertura temporal:** → **solo meses con datos** (no devuelve meses vacíos ni futuros).
+- **Q-04 — Volumen y orden:** → **histórico completo**; el frontend ordena por `year`/`month` (con el filtro de año solo se pintan ≤ 12 filas).
+- **Q-05 — Cuadre con el Dashboard:** → **sí, deben cuadrar** (misma fuente de verdad); discrepancia = bug → verificación explícita en QA (§4.5). Nota: `AGENTS.md` documenta que el backend rechaza `transactionType: EXPENSE` — validar con datos reales.
+- **Q-06 — Nulos:** se asumen no nulos; acceso defensivo en código (A6).
+- **Q-07 — Alcance por usuario:** → datos del usuario del token (A2).
 
 ### B. Alcance funcional
 
-- **Q-08 — ¿Solo lectura?:** confirma que la primera versión es solo visualización. ¿Hay previsión de metas/objetivos de ahorro que exijan diseño extensible (p. ej. clave de identidad `(year, month)` en el modelo)?
-- **Q-09 — Selector de año:** ¿la página muestra **todos los años** a la vez, un año seleccionable (como el selector de meses del Dashboard), o solo el año actual?
-- **Q-10 — ¿Relación con el Dashboard?:** ¿esta API debe **sustituir** los cálculos de ingresos/gastos/balance que hoy hace el Dashboard en cliente, o el Dashboard sigue como está y `/savings` se usa solo en la página nueva?
-- **Q-11 — Exportación:** ¿hace falta exportar datos (CSV/PDF)?
-- **Q-12 — Visualización:** ¿además de la tabla se quiere un **gráfico de evolución** (barras/línea, `recharts` ya instalado) y/o comparativa mes a mes? ¿Y KPIs destacados (mejor mes, media, tendencia)?
+- **Q-08 — ¿Solo lectura?:** → **sí, solo lectura** en esta versión.
+- **Q-09 — Selector de año:** → **selector de año** «← 2026 →» con botón «Hoy», análogo al del Panel; años disponibles derivados del array.
+- **Q-10 — ¿Relación con el Dashboard?:** → **solo la página nueva**; el Dashboard no cambia.
+- **Q-11 — Exportación:** → **no**.
+- **Q-12 — Visualización:** → **solo tarjetas + tabla**; sin gráfico.
 
 ### C. UX / UI
 
-- **Q-13 — Ruta, nombre e icono:** ¿`/savings` con etiqueta «Ahorros» e icono `PiggyBank` (lucide) en el Sidebar? ¿Otra ubicación o nombre?
-- **Q-14 — Layout:** ¿tarjetas resumen + tabla + gráfico es correcto? ¿O se quiere otra composición (p. ej. solo tarjetas, o tarjetas por año)?
-- **Q-15 — Ahorro negativo:** ¿cómo se muestra un mes con ahorro negativo («-12,50 €» en rojo/`text-primary`, aviso, icono)?
-- **Q-16 — Mes actual:** ¿destacarse de alguna forma (badge «Actual», fila resaltada)?
-- **Q-17 — Varios años:** si hay datos de múltiples años, ¿se agrupa por año (apartados/tablas) o se mezcla en una sola tabla con columna de año?
+- **Q-13 — Ruta, nombre e icono:** → **`/savings`**, etiqueta «Ahorros», icono `PiggyBank`, tras Deudas en el Sidebar.
+- **Q-14 — Layout:** → tarjetas resumen + tabla (§4.3), según respuestas a Q-12/Q-17.
+- **Q-15 — Ahorro negativo:** → **rojo (`text-primary`) con signo −**.
+- **Q-16 — Mes actual:** → **destacar con badge «Actual»**.
+- **Q-17 — Varios años:** → **tabla única** (nunca secciones por año); el año lo fija el selector.
 
 ### D. Integración técnica
 
-- **Q-18 — Disponibilidad del endpoint:** ¿`GET /savings` ya responde en **desarrollo local** (`localhost:8080`) y en **prod** (onrender)? Verificar antes de implementar; si solo está en prod, decidir contra qué entorno se desarrolla.
-- **Q-19 — Autenticación y roles:** ¿requiere token como el resto? ¿Algún rol o restricción especial que pueda devolver 403?
-- **Q-20 — Manejo de errores:** dado que el backend devuelve **403 con body vacío** (problema conocido que ya rompió el interceptor en otros flujos), ¿qué comportamiento esperamos? ¿Arreglar el interceptor en este issue (cambia alcance) o solo mostrar mensaje de error genérico?
-- **Q-21 — `/health`:** ¿queremos usar el nuevo `GET /health` (p. ej. aviso de backend caído en la UI) o lo dejamos fuera?
-- **Q-22 — Estado:** ¿solo estado local (`useState`) como el resto de páginas, o interesa cachear en Zustand (p. ej. si Dashboard y Ahorros van a compartir datos, según Q-10)?
+- **Q-18 — Disponibilidad del endpoint:** → **ya responde en local y prod**.
+- **Q-19 — Autenticación y roles:** → Bearer estándar como el resto (A7).
+- **Q-20 — Manejo de errores 403:** → **mensaje genérico en la página**; el arreglo del interceptor es un issue aparte.
+- **Q-21 — `/health`:** → **no se usará nunca en el frontend**.
+- **Q-22 — Estado:** → **`useState` local**.
 
 ### E. Verificación y aceptación
 
-- **Q-23 — Tests:** con «no hay test runner» configurado, ¿conformes con verificar vía `npm run build` + `npm run lint` + prueba manual? ¿O quieres aprovechar para introducir Vitest (amplía alcance)?
-- **Q-24 — Entorno de prueba:** ¿probamos contra backend local con datos sembrados, contra prod (¡con cuidado con datos reales!), o ambos?
-- **Q-25 — Criterios de aceptación:** ¿estos criterios son válidos? (1) la página lista los ahorros sin errores; (2) los importes se muestran en € con formato español; (3) estados de carga/vacío/error cubiertos; (4) build y lint en verde; (5) navegación desde Sidebar. ¿Añades alguno más?
+- **Q-23 — Tests:** → **`npm run build` + `npm run lint` + prueba manual**; sin Vitest.
+- **Q-24 — Entorno de prueba:** → **producción** con datos reales.
+- **Q-25 — Criterios de aceptación:** se mantienen los propuestos: (1) la página lista los ahorros sin errores; (2) importes en € con formato español; (3) estados de carga/vacío/error cubiertos; (4) build y lint en verde; (5) navegación desde Sidebar. **+ (6) cuadre de un mes con el Dashboard** (Q-05).
 
 ## 8. Riesgos y peculiaridades conocidas
 
-- **R1 — Consistencia de cifras (Q-05):** mientras el Dashboard calcule en cliente y `/savings` en backend, pueden discrepar → decisión explícita requerida.
-- **R2 — `EXPENSE` rechazado (AGENTS.md):** si el backend sigue rechazando transacciones de tipo `EXPENSE`, la semántica de `totalExpense` es sospechosa → validar con datos reales.
-- **R3 — 403 con body vacío:** provoca errores de parseo en Axios (ya ocurrido); ampliar el interceptor es cambio de alcance (Q-20).
-- **R4 — Array sin paginación:** si el histórico crece indefinidamente, la tabla puede crecer mucho → Q-04/Q-17.
-- **R5 — Convención de mes (Q-01):** un off-by-one silencioso desplaza todos los nombres de mes → verificar con un dato real antes de maquetar.
+- **R1 — Consistencia de cifras:** Q-05 exige que cuadren; la verificación de cuadre es parte de la aceptación (§4.5). Riesgo residual si `totalExpense` del backend usa otra definición (p. ej. por el rechazo de `EXPENSE` en transacciones) → validar con datos reales en prod.
+- **R2 — `EXPENSE` rechazado (AGENTS.md):** si el backend sigue rechazando transacciones de tipo `EXPENSE`, la semántica de `totalExpense` es sospechosa → comprobar durante el QA (vinculado a Q-05).
+- **R3 — 403 con body vacío:** la página mostrará mensaje genérico; el arreglo del interceptor queda fuera (Q-20, issue aparte).
+- **R4 — Histórico completo:** el array crece con el tiempo; al filtrar por año la tabla pinta ≤ 12 filas, pero la carga trae todo el histórico → si en el futuro crece mucho, valorar paginación/limit del backend.
+- **R5 — Off-by-one de mes:** resuelto con Q-01 (1–12); usar `MONTH_NAMES[month - 1]` al renderizar.
 
 ## 9. Siguientes pasos
 
-1. Responder las preguntas de §7 (o eliminar las irrelevantes).
-2. Ajustar §4 con las respuestas y aprobar la SDD.
-3. Invocar `writing-plans` para generar el plan de implementación (issue → rama → PR por change, según `AGENTS.md`).
+1. ~~Responder las preguntas de §7~~ ✔ (2026-10-07).
+2. **Aprobar esta SDD** (revisión del usuario).
+3. Invocar `writing-plans` para generar el plan de implementación (issue → rama → PR por cambio, según `AGENTS.md`).
