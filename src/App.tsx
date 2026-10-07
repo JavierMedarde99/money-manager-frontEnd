@@ -7,6 +7,7 @@ import { RegisterPage } from "@/pages/Register";
 import { CategoriesPage } from "@/pages/Categories";
 import { TransactionsPage } from "@/pages/Transactions";
 import { DebtsPage } from "@/pages/Debts";
+import { SavingsPage } from "@/pages/Savings";
 import { DashboardPage } from "@/pages/Dashboard";
 import { ProfilePage } from "@/pages/Profile";
 import { useAuthStore } from "@/store/auth";
@@ -36,6 +37,7 @@ function App() {
           <Route path="/transactions" element={<TransactionsPage />} />
           <Route path="/categories" element={<CategoriesPage />} />
           <Route path="/debts" element={<DebtsPage />} />
+          <Route path="/savings" element={<SavingsPage />} />
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />

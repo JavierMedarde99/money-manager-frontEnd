@@ -9,6 +9,7 @@ import {
   ArrowRightLeft,
   FolderOpen,
   CreditCard,
+  PiggyBank,
   LogOut,
   Menu,
   X,
@@ -21,6 +22,7 @@ const navItems = [
   { to: "/transactions", label: "Transacciones", icon: ArrowRightLeft },
   { to: "/categories", label: "Categorías", icon: FolderOpen },
   { to: "/debts", label: "Deudas", icon: CreditCard },
+  { to: "/savings", label: "Ahorros", icon: PiggyBank },
 ];
 
 export function Sidebar() {
