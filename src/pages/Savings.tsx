@@ -47,11 +47,10 @@ export function SavingsPage() {
   const [selectedYear, setSelectedYear] = useState<number | null>(null);
 
   const fetchSavings = useCallback(async () => {
-    setLoading(true);
-    setError(false);
     try {
       const data = await savingsApi.getAll();
       setSavings(data);
+      setError(false);
     } catch {
       setError(true);
     } finally {
@@ -62,6 +61,11 @@ export function SavingsPage() {
   useEffect(() => {
     fetchSavings();
   }, [fetchSavings]);
+
+  const handleRetry = () => {
+    setLoading(true);
+    fetchSavings();
+  };
 
   const now = new Date();
   const currentYear = now.getFullYear();
@@ -135,19 +139,19 @@ export function SavingsPage() {
               variant="ghost"
               size="icon"
               onClick={goToPrevYear}
-              disabled={year === yearMin}
+              disabled={yearsAsc.length === 0 || year === yearMin}
               className="h-8 w-8"
             >
               <ChevronLeft className="h-4 w-4" />
             </Button>
-            <span className="text-sm font-semibold px-2 min-w-[110px] text-center">
+            <span className="text-sm font-semibold px-2 min-w-[150px] text-center">
               {year}
             </span>
             <Button
               variant="ghost"
               size="icon"
               onClick={goToNextYear}
-              disabled={year === yearMax}
+              disabled={yearsAsc.length === 0 || year === yearMax}
               className="h-8 w-8"
             >
               <ChevronRight className="h-4 w-4" />
@@ -170,7 +174,7 @@ export function SavingsPage() {
           <p className="text-sm text-muted-foreground">
             Error al cargar los ahorros
           </p>
-          <Button onClick={fetchSavings}>Reintentar</Button>
+          <Button onClick={handleRetry}>Reintentar</Button>
         </div>
       ) : savings.length === 0 ? (
         <EmptyState
@@ -232,7 +236,7 @@ export function SavingsPage() {
                     <TableRow key={`${s.year}-${s.month}`}>
                       <TableCell className="font-semibold">
                         <div className="flex items-center gap-2">
-                          {MONTH_NAMES[s.month - 1]}
+                          {MONTH_NAMES[s.month - 1] ?? String(s.month)}
                           {s.year === currentYear &&
                             s.month === now.getMonth() + 1 && (
                               <Badge
