@@ -20,10 +20,17 @@ import {
   PiggyBank,
   ChevronLeft,
   ChevronRight,
-  TrendingUp,
-  TrendingDown,
-  Calculator,
 } from "lucide-react";
+import {
+  BarChart,
+  Bar,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+} from "recharts";
 
 const MONTH_NAMES = [
   "Enero",
@@ -80,48 +87,19 @@ export function SavingsPage() {
   const yearMonths = savings
     .filter((s) => s.year === year)
     .sort((a, b) => a.month - b.month);
-  const totalSavings = yearMonths.reduce((sum, s) => sum + s.savings, 0);
-  const totalIncome = yearMonths.reduce((sum, s) => sum + s.totalIncome, 0);
-  const totalExpense = yearMonths.reduce((sum, s) => sum + s.totalExpense, 0);
-  const avgSavings =
-    yearMonths.length > 0 ? totalSavings / yearMonths.length : 0;
+  const chartData = Array.from({ length: 12 }, (_, i) => {
+    const entry = yearMonths.find((s) => s.month === i + 1);
+    return {
+      month: MONTH_NAMES[i].slice(0, 3),
+      savings: entry ? entry.savings : null,
+    };
+  });
 
   const goToPrevYear = () =>
     setSelectedYear((prev) => Math.max((prev ?? year) - 1, yearMin ?? year));
   const goToNextYear = () =>
     setSelectedYear((prev) => Math.min((prev ?? year) + 1, yearMax));
   const showToday = yearsAsc.includes(currentYear) && year !== currentYear;
-
-  const summaryCards = [
-    {
-      label: "Ahorro total",
-      value: `${totalSavings.toFixed(2)} €`,
-      icon: PiggyBank,
-      color: "text-secondary",
-      bg: "from-secondary-400 to-secondary-600",
-    },
-    {
-      label: "Ingresos",
-      value: `${totalIncome.toFixed(2)} €`,
-      icon: TrendingUp,
-      color: "text-tertiary",
-      bg: "from-tertiary-400 to-tertiary-600",
-    },
-    {
-      label: "Gastos",
-      value: `${totalExpense.toFixed(2)} €`,
-      icon: TrendingDown,
-      color: "text-primary",
-      bg: "from-primary-400 to-primary-600",
-    },
-    {
-      label: "Media mensual",
-      value: `${avgSavings.toFixed(2)} €`,
-      icon: Calculator,
-      color: "text-secondary",
-      bg: "from-secondary-400 to-secondary-600",
-    },
-  ];
 
   if (loading) {
     return <CandyLoader />;
@@ -184,29 +162,58 @@ export function SavingsPage() {
         />
       ) : (
         <>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {summaryCards.map((card) => (
-            <Card key={card.label} className="card-gloss">
-              <CardContent className="p-5">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-muted-foreground font-medium">
-                      {card.label}
-                    </p>
-                    <p className="font-display text-2xl font-bold mt-1">
-                      {card.value}
-                    </p>
-                  </div>
-                  <div
-                    className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${card.bg} flex items-center justify-center shadow-soft`}
-                  >
-                    <card.icon className={`h-6 w-6 ${card.color}`} />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card className="card-gloss">
+          <CardHeader>
+            <CardTitle className="font-display">
+              Ahorro mensual — {year}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="h-64">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={chartData}
+                  margin={{ top: 8, right: 8, left: 8, bottom: 0 }}
+                >
+                  <CartesianGrid
+                    strokeDasharray="3 3"
+                    className="stroke-border/50"
+                    vertical={false}
+                  />
+                  <XAxis
+                    dataKey="month"
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 12 }}
+                  />
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    tick={{ fontSize: 12 }}
+                    tickFormatter={(v) => `${Number(v).toFixed(0)}€`}
+                    width={56}
+                  />
+                  <Tooltip
+                    formatter={(value) => `${Number(value).toFixed(2)} €`}
+                    cursor={{ fill: "rgba(0,0,0,0.04)" }}
+                  />
+                  <Bar dataKey="savings" radius={[8, 8, 0, 0]}>
+                    {chartData.map((d) => (
+                      <Cell
+                        key={d.month}
+                        fill={
+                          d.savings !== null && d.savings < 0
+                            ? "var(--color-primary)"
+                            : "var(--color-secondary)"
+                        }
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </CardContent>
+        </Card>
 
         <Card className="card-gloss">
           <CardHeader>
