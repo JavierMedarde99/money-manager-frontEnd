@@ -137,7 +137,7 @@ export function TransactionsPage() {
       };
       const [transactionData, categoryData] = await Promise.all([
         transactionApi.getAll(apiFilters),
-        categoryApi.getAll(),
+        categoryApi.getAllForOptions(),
       ]);
       setData(transactionData);
       setCategories(categoryData);

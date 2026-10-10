@@ -60,6 +60,14 @@ export interface PageTransactionResponseDTO {
   totalPages: number;
 }
 
+export interface PageCategoryResponseDTO {
+  content: CategoryResponseDTO[];
+  page: number;
+  size: number;
+  totalElements: number;
+  totalPages: number;
+}
+
 export interface DebtRequestDTO {
   name: string;
   totalAmount?: number;

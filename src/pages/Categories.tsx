@@ -1,6 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { categoryApi } from "@/api/category";
-import type { CategoryResponseDTO, CategoryRequestDTO } from "@/types";
+import type {
+  CategoryResponseDTO,
+  CategoryRequestDTO,
+  PageCategoryResponseDTO,
+} from "@/types";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,20 +15,25 @@ import {
   TableRow,
   TableHead,
   TableCell,
-} from "@/components/ui/table";import {
+} from "@/components/ui/table";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { Pagination } from "@/components/ui/pagination";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { Plus, Pencil, Trash2, Loader2, Palette, FolderOpen } from "lucide-react";
 
+const PAGE_SIZE = 10;
+
 export function CategoriesPage() {
-  const [categories, setCategories] = useState<CategoryResponseDTO[]>([]);
+  const [data, setData] = useState<PageCategoryResponseDTO | null>(null);
+  const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] =
@@ -37,20 +46,21 @@ export function CategoriesPage() {
   const [deleting, setDeleting] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
 
-  const fetchCategories = async () => {
+  const fetchCategories = useCallback(async () => {
+    setLoading(true);
     try {
-      const data = await categoryApi.getAll();
-      setCategories(data);
+      const res = await categoryApi.getAll({ page, size: PAGE_SIZE });
+      setData(res);
     } catch {
       // error handled by UI state
     } finally {
       setLoading(false);
     }
-  };
+  }, [page]);
 
   useEffect(() => {
     fetchCategories();
-  }, []);
+  }, [fetchCategories]);
 
   const openCreate = () => {
     setEditingCategory(null);
@@ -96,7 +106,11 @@ export function CategoriesPage() {
     setDeleting(true);
     try {
       await categoryApi.delete(id);
-      await fetchCategories();
+      if (data && data.content.length === 1 && data.page > 0) {
+        setPage(data.page - 1);
+      } else {
+        await fetchCategories();
+      }
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { message?: string } } };
       const message =
@@ -127,13 +141,14 @@ export function CategoriesPage() {
         }
       />
 
-      {categories.length === 0 ? (
+      {!data || data.totalElements === 0 ? (
         <EmptyState
           icon={Palette}
           title="No hay categorías creadas"
           hint="Crea tu primera categoría para empezar"
         />
       ) : (
+        <>
         <div className="overflow-x-auto">
           <Table>
           <TableHeader>
@@ -144,7 +159,7 @@ export function CategoriesPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {categories.map((cat) => (
+            {data.content.map((cat) => (
               <TableRow key={cat.id}>
                 <TableCell>
                   <div
@@ -177,6 +192,17 @@ export function CategoriesPage() {
           </TableBody>
           </Table>
         </div>
+
+        <Pagination
+          currentPage={data.page + 1}
+          totalPages={data.totalPages}
+          onPageChange={(p) => setPage(p - 1)}
+        />
+
+        <div className="text-center text-sm text-muted-foreground">
+          Mostrando {data.content.length} de {data.totalElements} categorías
+        </div>
+        </>
       )}
 
       {/* Create/Edit Dialog */}
