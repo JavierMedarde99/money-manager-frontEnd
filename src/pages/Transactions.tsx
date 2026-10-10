@@ -30,6 +30,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Pagination } from "@/components/ui/pagination";
+import { PAGE_SIZE_OPTIONS } from "@/lib/pagination";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { EmptyState } from "@/components/layout/EmptyState";
@@ -497,13 +498,33 @@ export function TransactionsPage() {
             </Table>
           </div>
 
-          <Pagination
-            currentPage={data.page + 1}
-            totalPages={data.totalPages}
-            onPageChange={(page) =>
-              setFilters((prev) => ({ ...prev, page: page - 1 }))
-            }
-          />
+          <div className="flex flex-col items-center gap-3">
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">Mostrar</span>
+              <Select
+                options={PAGE_SIZE_OPTIONS}
+                value={String(filters.size)}
+                onChange={(e) =>
+                  setFilters((prev) => ({
+                    ...prev,
+                    page: 0,
+                    size: Number(e.target.value),
+                  }))
+                }
+                className="w-24"
+              />
+              <span className="text-sm text-muted-foreground">
+                elementos por página
+              </span>
+            </div>
+            <Pagination
+              currentPage={data.page + 1}
+              totalPages={data.totalPages}
+              onPageChange={(page) =>
+                setFilters((prev) => ({ ...prev, page: page - 1 }))
+              }
+            />
+          </div>
 
           <div className="text-center text-sm text-muted-foreground">
             Mostrando {data.content.length} de {data.totalElements} transacciones
