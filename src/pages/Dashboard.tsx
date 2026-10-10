@@ -72,7 +72,7 @@ export function DashboardPage() {
             to: monthLastDay,
           }),
           debtApi.getAll(),
-          categoryApi.getAll(),
+          categoryApi.getAllForOptions(),
         ]);
         setTransactions(txData.content);
         setDebts(debtData);
