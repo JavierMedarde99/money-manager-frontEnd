@@ -9,6 +9,7 @@ import type {
   CategoryResponseDTO,
   PageTransactionResponseDTO,
 } from "@/types";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -565,11 +566,7 @@ export function TransactionsPage() {
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4 mt-4">
-            {formError && (
-              <div role="alert" className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
-                {formError}
-              </div>
-            )}
+            {formError && <Alert>{formError}</Alert>}
             <div className="space-y-2">
               <Label htmlFor="tx-name">Nombre</Label>
               <Input

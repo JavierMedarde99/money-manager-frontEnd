@@ -7,6 +7,7 @@ import type {
   PaymentResponseDTO,
 } from "@/types";
 import { getRemainingAmount } from "@/lib/debts";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -97,14 +98,7 @@ export function PaymentFormDialog({
           </p>
         </div>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {error && (
-            <div
-              role="alert"
-              className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center"
-            >
-              {error}
-            </div>
-          )}
+          {error && <Alert>{error}</Alert>}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="pay-date">Fecha del pago</Label>

@@ -6,6 +6,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "./dialog";
+import { Alert } from "./alert";
 import { Button } from "./button";
 
 interface ConfirmDialogProps {
@@ -42,12 +43,7 @@ export function ConfirmDialog({
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         {error ? (
-          <div
-            role="alert"
-            className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2"
-          >
-            {error}
-          </div>
+          <Alert className="mt-2">{error}</Alert>
         ) : (
           <p className="text-muted-foreground mt-2">{description}</p>
         )}

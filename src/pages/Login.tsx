@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -148,9 +149,9 @@ export function LoginPage() {
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
                 {sessionExpired && (
-                  <div
-                    role="alert"
-                    className="flex items-center justify-center gap-2 rounded-full bg-amber-50 border border-amber-200 p-3 text-sm text-amber-700 text-center"
+                  <Alert
+                    variant="warning"
+                    className="flex items-center justify-center gap-2"
                   >
                     <AlertTriangle className="h-4 w-4 shrink-0" />
                     <span>Tu sesión ha caducado. Inicia sesión de nuevo.</span>
@@ -162,13 +163,10 @@ export function LoginPage() {
                     >
                       ×
                     </button>
-                  </div>
+                  </Alert>
                 )}
                 {error && (
-                  <div
-                    role="alert"
-                    className="rounded-full bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center"
-                  >
+                  <Alert>
                     {error}
                     <button
                       type="button"
@@ -177,7 +175,7 @@ export function LoginPage() {
                     >
                       ×
                     </button>
-                  </div>
+                  </Alert>
                 )}
                 <div className="space-y-2">
                   <Label htmlFor="username">Usuario</Label>

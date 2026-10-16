@@ -26,6 +26,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getProgress, getRemainingAmount } from "@/lib/debts";
+import { cn } from "@/lib/utils";
 
 interface DebtCardProps {
   debt: DebtResponseDTO;
@@ -100,13 +101,13 @@ export function DebtCard({
           <div className="flex items-center gap-2">
             <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden">
               <div
-                className="h-full rounded-full transition-all duration-500"
-                style={{
-                  width: `${progress}%`,
-                  background: isPaid
-                    ? "linear-gradient(90deg, #22c55e, #16a34a)"
-                    : "linear-gradient(90deg, #e040a0, #7c52aa)",
-                }}
+                className={cn(
+                  "h-full rounded-full bg-linear-to-r transition-all duration-500",
+                  isPaid
+                    ? "from-green-500 to-green-600"
+                    : "from-primary to-secondary"
+                )}
+                style={{ width: `${progress}%` }}
               />
             </div>
             <Badge variant={isPaid ? "tertiary" : "default"}>

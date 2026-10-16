@@ -65,7 +65,9 @@ Design system "Candy" per `DESIGN.md`:
 
 Hand-rolled in `src/components/ui/` following shadcn/ui patterns (CVA variants, `cn()` utility, forwardRef). Not installed via shadcn CLI — edit directly.
 
-Components: avatar, badge, button, card, dialog, dropdown-menu, input, label, pagination, select, separator, table, textarea, toggle.
+Components: alert, avatar, badge, button, card, confirm-dialog, dialog, dropdown-menu, input, label, pagination, select, separator, table, textarea, toggle.
+
+`Alert` is the single shape for message blocks (`error` | `warning` | `success`), and `ConfirmDialog` the shared destructive confirmation — use them instead of hand-rolling `div`s with red/amber classes.
 
 The whole app mounts inside an `ErrorBoundary` (`src/components/ErrorBoundary.tsx`) in `src/main.tsx`.
 
