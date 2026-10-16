@@ -1,10 +1,10 @@
+import * as React from "react";
 import { cn } from "@/lib/utils";
 
-interface ToggleProps {
+interface ToggleProps
+  extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onChange"> {
   checked: boolean;
   onCheckedChange: (checked: boolean) => void;
-  disabled?: boolean;
-  className?: string;
 }
 
 function Toggle({
@@ -12,9 +12,11 @@ function Toggle({
   onCheckedChange,
   disabled,
   className,
+  ...props
 }: ToggleProps) {
   return (
     <button
+      {...props}
       type="button"
       role="switch"
       aria-checked={checked}
