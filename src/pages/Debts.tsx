@@ -585,7 +585,7 @@ export function DebtsPage() {
           )}
           <form onSubmit={handleSavePayment} className="space-y-4">
             {paymentError && (
-              <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
+              <div role="alert" className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
                 {paymentError}
               </div>
             )}
@@ -658,7 +658,7 @@ export function DebtsPage() {
             <DialogTitle>Eliminar Pago</DialogTitle>
           </DialogHeader>
           {deletePaymentError ? (
-            <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2">
+            <div role="alert" className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2">
               {deletePaymentError}
             </div>
           ) : (
@@ -701,7 +701,7 @@ export function DebtsPage() {
             <DialogTitle>Eliminar Deuda</DialogTitle>
           </DialogHeader>
           {deleteError ? (
-            <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2">
+            <div role="alert" className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2">
               {deleteError}
             </div>
           ) : (

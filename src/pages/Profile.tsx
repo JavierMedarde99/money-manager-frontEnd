@@ -134,11 +134,17 @@ export function ProfilePage() {
                   id="username"
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
+                  aria-invalid={fieldErrors.username ? true : undefined}
+                  aria-describedby={
+                    fieldErrors.username ? "username-error" : undefined
+                  }
                   className="pl-10"
                 />
               </div>
               {fieldErrors.username && (
-                <p className="text-xs text-red-500">{fieldErrors.username}</p>
+                <p id="username-error" role="alert" className="text-xs text-red-500">
+                  {fieldErrors.username}
+                </p>
               )}
             </div>
 
@@ -151,11 +157,15 @@ export function ProfilePage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  aria-invalid={fieldErrors.email ? true : undefined}
+                  aria-describedby={fieldErrors.email ? "email-error" : undefined}
                   className="pl-10"
                 />
               </div>
               {fieldErrors.email && (
-                <p className="text-xs text-red-500">{fieldErrors.email}</p>
+                <p id="email-error" role="alert" className="text-xs text-red-500">
+                  {fieldErrors.email}
+                </p>
               )}
             </div>
 

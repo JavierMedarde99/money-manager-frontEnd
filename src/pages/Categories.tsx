@@ -235,7 +235,7 @@ export function CategoriesPage() {
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4 mt-4">
             {formError && (
-              <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
+              <div role="alert" className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
                 {formError}
               </div>
             )}
@@ -294,7 +294,7 @@ export function CategoriesPage() {
             <DialogTitle>Eliminar Categoría</DialogTitle>
           </DialogHeader>
           {deleteError ? (
-            <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2">
+            <div role="alert" className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center mt-2">
               {deleteError}
             </div>
           ) : (

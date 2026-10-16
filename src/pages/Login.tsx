@@ -165,7 +165,10 @@ export function LoginPage() {
                   </div>
                 )}
                 {error && (
-                  <div className="rounded-full bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
+                  <div
+                    role="alert"
+                    className="rounded-full bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center"
+                  >
                     {error}
                     <button
                       type="button"
@@ -183,10 +186,16 @@ export function LoginPage() {
                     placeholder="Tu usuario"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
+                    aria-invalid={fieldErrors.username ? true : undefined}
+                    aria-describedby={
+                      fieldErrors.username ? "username-error" : undefined
+                    }
                     required
                   />
                   {fieldErrors.username && (
-                    <p className="text-xs text-red-500">{fieldErrors.username}</p>
+                    <p id="username-error" role="alert" className="text-xs text-red-500">
+                      {fieldErrors.username}
+                    </p>
                   )}
                 </div>
                 <div className="space-y-2">
@@ -196,10 +205,16 @@ export function LoginPage() {
                     placeholder="Tu contraseña"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    aria-invalid={fieldErrors.password ? true : undefined}
+                    aria-describedby={
+                      fieldErrors.password ? "password-error" : undefined
+                    }
                     required
                   />
                   {fieldErrors.password && (
-                    <p className="text-xs text-red-500">{fieldErrors.password}</p>
+                    <p id="password-error" role="alert" className="text-xs text-red-500">
+                      {fieldErrors.password}
+                    </p>
                   )}
                 </div>
               </CardContent>
