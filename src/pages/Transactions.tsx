@@ -34,6 +34,7 @@ import { PAGE_SIZE_OPTIONS } from "@/lib/pagination";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { EmptyState } from "@/components/layout/EmptyState";
+import { LoadError } from "@/components/LoadError";
 import {
   Plus,
   Pencil,
@@ -106,6 +107,7 @@ export function TransactionsPage() {
   const [data, setData] = useState<PageTransactionResponseDTO | null>(null);
   const [categories, setCategories] = useState<CategoryResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [noCategoryDialog, setNoCategoryDialog] = useState(false);
   const [editing, setEditing] = useState<TransactionResponseDTO | null>(null);
@@ -142,8 +144,9 @@ export function TransactionsPage() {
       ]);
       setData(transactionData);
       setCategories(categoryData);
+      setLoadError(false);
     } catch {
-      // error handled by UI state
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -369,6 +372,11 @@ export function TransactionsPage() {
       {/* Table */}
       {loading ? (
         <CandyLoader />
+      ) : loadError ? (
+        <LoadError
+          title="No se pudieron cargar las transacciones"
+          onRetry={fetchData}
+        />
       ) : !data || data.content.length === 0 ? (
         <EmptyState
           icon={ArrowRightLeft}

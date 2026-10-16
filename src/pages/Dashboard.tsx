@@ -13,6 +13,7 @@ import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
+import { LoadError } from "@/components/LoadError";
 import {
   ArrowRightLeft,
   TrendingUp,
@@ -50,6 +51,9 @@ export function DashboardPage() {
   const [debts, setDebts] = useState<DebtResponseDTO[]>([]);
   const [categories, setCategories] = useState<CategoryResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
+  // Bumped by the LoadError "Reintentar" button to re-run the load effect.
+  const [reloadKey, setReloadKey] = useState(0);
   const now = new Date();
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth());
   const [selectedYear, setSelectedYear] = useState(now.getFullYear());
@@ -77,14 +81,21 @@ export function DashboardPage() {
         setTransactions(txData.content);
         setDebts(debtData);
         setCategories(catData);
+        setLoadError(false);
       } catch {
-        // error handled by UI state
+        setLoadError(true);
       } finally {
         setLoading(false);
       }
     }
     load();
-  }, [monthFirstDay, monthLastDay]);
+  }, [monthFirstDay, monthLastDay, reloadKey]);
+
+  const handleRetry = () => {
+    setLoading(true);
+    setLoadError(false);
+    setReloadKey((key) => key + 1);
+  };
 
   const totalIncome = transactions
     .filter((t) => t.transactionType.toUpperCase() === "INCOME")
@@ -271,275 +282,281 @@ export function DashboardPage() {
         }
       />
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {stats.map((stat, index) => (
-          <Card
-            key={stat.title}
-            className={`card-gloss ${stat.onClick ? "cursor-pointer" : ""}`}
-            style={{ animationDelay: `${index * 100}ms` }}
-            onClick={stat.onClick}
-          >
-            <CardContent className="p-5">
-              <div className="flex items-center justify-between">
+      {loadError ? (
+        <LoadError title="No se pudo cargar el panel de datos" onRetry={handleRetry} />
+      ) : (
+        <>
+          {/* Stats Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {stats.map((stat, index) => (
+              <Card
+                key={stat.title}
+                className={`card-gloss ${stat.onClick ? "cursor-pointer" : ""}`}
+                style={{ animationDelay: `${index * 100}ms` }}
+                onClick={stat.onClick}
+              >
+                <CardContent className="p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground font-medium">
+                        {stat.title}
+                      </p>
+                      <p className="font-display text-2xl font-bold mt-1">
+                        {stat.value}
+                      </p>
+                    </div>
+                    <div
+                      className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${stat.bg} flex items-center justify-center shadow-soft`}
+                    >
+                      <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Net Balance Card */}
+          <Card className="hero-gradient relative overflow-hidden border-0 shadow-primary">
+            {/* Decorative circles */}
+            <div className="absolute -top-10 -right-10 h-48 w-48 rounded-full bg-white/15 animate-float-slow" />
+            <div className="absolute -bottom-16 left-1/3 h-40 w-40 rounded-full bg-white/10 animate-float-slow" style={{ animationDelay: "1.4s" }} />
+            <div className="absolute top-6 right-1/4 h-6 w-6 rounded-full border-2 border-white/30 animate-float-slow" style={{ animationDelay: "0.7s" }} />
+            <CardContent className="p-6 relative">
+              <div className="flex items-center justify-between flex-wrap gap-4">
                 <div>
-                  <p className="text-sm text-muted-foreground font-medium">
-                    {stat.title}
+                  <p className="text-sm text-white/70 font-semibold uppercase tracking-wider">
+                    Balance neto
                   </p>
-                  <p className="font-display text-2xl font-bold mt-1">
-                    {stat.value}
+                  <p className="font-display text-5xl font-bold mt-1 text-white">
+                    {(totalIncome - totalExpenses).toFixed(2)} €
                   </p>
                 </div>
-                <div
-                  className={`h-12 w-12 rounded-2xl bg-gradient-to-br ${stat.bg} flex items-center justify-center shadow-soft`}
-                >
-                  <stat.icon className={`h-6 w-6 ${stat.color}`} />
+                <div className="flex gap-3">
+                  <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-4 py-3">
+                    <div className="flex items-center gap-2 text-sm text-white/80">
+                      <ArrowUpRight className="h-4 w-4 text-white" />
+                      <span>Ingresos</span>
+                    </div>
+                    <p className="font-display font-bold text-white text-lg">
+                      {totalIncome.toFixed(2)} €
+                    </p>
+                  </div>
+                  <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-4 py-3">
+                    <div className="flex items-center gap-2 text-sm text-white/80">
+                      <ArrowDownRight className="h-4 w-4 text-white" />
+                      <span>Gastos</span>
+                    </div>
+                    <p className="font-display font-bold text-white text-lg">
+                      {totalExpenses.toFixed(2)} €
+                    </p>
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
-        ))}
-      </div>
 
-      {/* Net Balance Card */}
-      <Card className="hero-gradient relative overflow-hidden border-0 shadow-primary">
-        {/* Decorative circles */}
-        <div className="absolute -top-10 -right-10 h-48 w-48 rounded-full bg-white/15 animate-float-slow" />
-        <div className="absolute -bottom-16 left-1/3 h-40 w-40 rounded-full bg-white/10 animate-float-slow" style={{ animationDelay: "1.4s" }} />
-        <div className="absolute top-6 right-1/4 h-6 w-6 rounded-full border-2 border-white/30 animate-float-slow" style={{ animationDelay: "0.7s" }} />
-        <CardContent className="p-6 relative">
-          <div className="flex items-center justify-between flex-wrap gap-4">
-            <div>
-              <p className="text-sm text-white/70 font-semibold uppercase tracking-wider">
-                Balance neto
-              </p>
-              <p className="font-display text-5xl font-bold mt-1 text-white">
-                {(totalIncome - totalExpenses).toFixed(2)} €
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-4 py-3">
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <ArrowUpRight className="h-4 w-4 text-white" />
-                  <span>Ingresos</span>
-                </div>
-                <p className="font-display font-bold text-white text-lg">
-                  {totalIncome.toFixed(2)} €
-                </p>
-              </div>
-              <div className="bg-white/15 backdrop-blur-md border border-white/25 rounded-2xl px-4 py-3">
-                <div className="flex items-center gap-2 text-sm text-white/80">
-                  <ArrowDownRight className="h-4 w-4 text-white" />
-                  <span>Gastos</span>
-                </div>
-                <p className="font-display font-bold text-white text-lg">
-                  {totalExpenses.toFixed(2)} €
-                </p>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Pie Charts: Income + Expenses */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Income Pie Chart */}
-        <Card className="card-gloss">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 font-display">
-              <TrendingUp className="h-5 w-5 text-tertiary" />
-              Ingresos por categoría
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {incomePieData.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No hay ingresos registrados
-              </p>
-            ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={incomePieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    nameKey="name"
-                  >
-                    {incomePieData.map((entry, index) => (
-                      <Cell key={`income-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => [
-                      `${Number(value).toFixed(2)} €`,
-                      "Importe",
-                    ]}
-                    contentStyle={{
-                      borderRadius: "12px",
-                      border: "none",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Expenses Pie Chart */}
-        <Card className="card-gloss">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 font-display">
-              <TrendingDown className="h-5 w-5 text-primary" />
-              Gastos por categoría
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            {expensesPieData.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-8">
-                No hay gastos registrados
-              </p>
-            ) : (
-              <ResponsiveContainer width="100%" height={300}>
-                <PieChart>
-                  <Pie
-                    data={expensesPieData}
-                    cx="50%"
-                    cy="50%"
-                    innerRadius={50}
-                    outerRadius={100}
-                    paddingAngle={3}
-                    dataKey="value"
-                    nameKey="name"
-                  >
-                    {expensesPieData.map((entry, index) => (
-                      <Cell key={`expense-${index}`} fill={entry.color} />
-                    ))}
-                  </Pie>
-                  <Tooltip
-                    formatter={(value) => [
-                      `${Number(value).toFixed(2)} €`,
-                      "Importe",
-                    ]}
-                    contentStyle={{
-                      borderRadius: "12px",
-                      border: "none",
-                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                    }}
-                  />
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Transactions - Full Width */}
-      <Card className="card-gloss">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="font-display">Transacciones recientes</CardTitle>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigate("/transactions")}
-          >
-            Ver todas
-            <ArrowRightLeft className="h-4 w-4" />
-          </Button>
-        </CardHeader>
-        <CardContent>
-          {recentTransactions.length === 0 ? (
-            <p className="text-sm text-muted-foreground text-center py-4">
-              No hay transacciones recientes
-            </p>
-          ) : (
-            <div className="space-y-3">
-              {recentTransactions.map((tx) => (
-                <div
-                  key={tx.id}
-                  className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
-                >
-                  <div className="flex items-center gap-3">
-                    <div
-                      className="h-8 w-8 rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: tx.category.color + "20" }}
-                    >
-                      <div
-                        className="h-3 w-3 rounded-full"
-                        style={{ backgroundColor: tx.category.color }}
+          {/* Pie Charts: Income + Expenses */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Income Pie Chart */}
+            <Card className="card-gloss">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-display">
+                  <TrendingUp className="h-5 w-5 text-tertiary" />
+                  Ingresos por categoría
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {incomePieData.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    No hay ingresos registrados
+                  </p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={incomePieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={100}
+                        paddingAngle={3}
+                        dataKey="value"
+                        nameKey="name"
+                      >
+                        {incomePieData.map((entry, index) => (
+                          <Cell key={`income-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value) => [
+                          `${Number(value).toFixed(2)} €`,
+                          "Importe",
+                        ]}
+                        contentStyle={{
+                          borderRadius: "12px",
+                          border: "none",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        }}
                       />
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold">{tx.name}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {tx.transactionDate}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="text-right">
-                    <p
-                      className={`text-sm font-bold ${
-                        tx.transactionType.toUpperCase() === "INCOME"
-                          ? "text-tertiary"
-                          : "text-primary"
-                      }`}
-                    >
-                      {tx.transactionType.toUpperCase() === "INCOME"
-                        ? "+"
-                        : "-"}
-                      {txTotal(tx).toFixed(2)} €
-                    </p>
-                    <Badge
-                      variant={
-                        tx.transactionType.toUpperCase() === "INCOME"
-                          ? "tertiary"
-                          : "default"
-                      }
-                      className="text-[10px]"
-                    >
-                      {tx.transactionType.toUpperCase() === "INCOME"
-                        ? "Ingreso"
-                        : "Gasto"}
-                    </Badge>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
 
-      {/* Quick Actions */}
-      <Card className="card-gloss">
-        <CardContent className="p-6">
-          <h3 className="font-display font-bold text-card-foreground mb-4 text-lg">
-            Acciones rápidas
-          </h3>
-          <div className="flex flex-wrap gap-3">
-            <Button onClick={() => navigate("/transactions")}>
-              <Plus className="h-4 w-4" />
-              Nueva Transacción
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => navigate("/categories")}
-            >
-              <FolderOpen className="h-4 w-4" />
-              Categorías
-            </Button>
-            <Button variant="outline" onClick={() => navigate("/debts")}>
-              <CreditCard className="h-4 w-4" />
-              Nueva Deuda
-            </Button>
+            {/* Expenses Pie Chart */}
+            <Card className="card-gloss">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 font-display">
+                  <TrendingDown className="h-5 w-5 text-primary" />
+                  Gastos por categoría
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {expensesPieData.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">
+                    No hay gastos registrados
+                  </p>
+                ) : (
+                  <ResponsiveContainer width="100%" height={300}>
+                    <PieChart>
+                      <Pie
+                        data={expensesPieData}
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={50}
+                        outerRadius={100}
+                        paddingAngle={3}
+                        dataKey="value"
+                        nameKey="name"
+                      >
+                        {expensesPieData.map((entry, index) => (
+                          <Cell key={`expense-${index}`} fill={entry.color} />
+                        ))}
+                      </Pie>
+                      <Tooltip
+                        formatter={(value) => [
+                          `${Number(value).toFixed(2)} €`,
+                          "Importe",
+                        ]}
+                        contentStyle={{
+                          borderRadius: "12px",
+                          border: "none",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        }}
+                      />
+                      <Legend />
+                    </PieChart>
+                  </ResponsiveContainer>
+                )}
+              </CardContent>
+            </Card>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Recent Transactions - Full Width */}
+          <Card className="card-gloss">
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle className="font-display">Transacciones recientes</CardTitle>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate("/transactions")}
+              >
+                Ver todas
+                <ArrowRightLeft className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent>
+              {recentTransactions.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">
+                  No hay transacciones recientes
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  {recentTransactions.map((tx) => (
+                    <div
+                      key={tx.id}
+                      className="flex items-center justify-between p-3 rounded-xl hover:bg-muted/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div
+                          className="h-8 w-8 rounded-full flex items-center justify-center"
+                          style={{ backgroundColor: tx.category.color + "20" }}
+                        >
+                          <div
+                            className="h-3 w-3 rounded-full"
+                            style={{ backgroundColor: tx.category.color }}
+                          />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold">{tx.name}</p>
+                          <p className="text-xs text-muted-foreground">
+                            {tx.transactionDate}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <p
+                          className={`text-sm font-bold ${
+                            tx.transactionType.toUpperCase() === "INCOME"
+                              ? "text-tertiary"
+                              : "text-primary"
+                          }`}
+                        >
+                          {tx.transactionType.toUpperCase() === "INCOME"
+                            ? "+"
+                            : "-"}
+                          {txTotal(tx).toFixed(2)} €
+                        </p>
+                        <Badge
+                          variant={
+                            tx.transactionType.toUpperCase() === "INCOME"
+                              ? "tertiary"
+                              : "default"
+                          }
+                          className="text-[10px]"
+                        >
+                          {tx.transactionType.toUpperCase() === "INCOME"
+                            ? "Ingreso"
+                            : "Gasto"}
+                        </Badge>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Quick Actions */}
+          <Card className="card-gloss">
+            <CardContent className="p-6">
+              <h3 className="font-display font-bold text-card-foreground mb-4 text-lg">
+                Acciones rápidas
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                <Button onClick={() => navigate("/transactions")}>
+                  <Plus className="h-4 w-4" />
+                  Nueva Transacción
+                </Button>
+                <Button
+                  variant="secondary"
+                  onClick={() => navigate("/categories")}
+                >
+                  <FolderOpen className="h-4 w-4" />
+                  Categorías
+                </Button>
+                <Button variant="outline" onClick={() => navigate("/debts")}>
+                  <CreditCard className="h-4 w-4" />
+                  Nueva Deuda
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </>
+      )}
     </div>
   );
 }

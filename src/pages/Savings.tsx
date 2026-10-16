@@ -16,6 +16,7 @@ import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { EmptyState } from "@/components/layout/EmptyState";
+import { LoadError } from "@/components/LoadError";
 import {
   PiggyBank,
   ChevronLeft,
@@ -150,12 +151,10 @@ export function SavingsPage() {
         }
       />
       {error ? (
-        <div className="text-center py-8 space-y-4">
-          <p className="text-sm text-muted-foreground">
-            Error al cargar los ahorros
-          </p>
-          <Button onClick={handleRetry}>Reintentar</Button>
-        </div>
+        <LoadError
+          title="No se pudieron cargar los ahorros"
+          onRetry={handleRetry}
+        />
       ) : savings.length === 0 ? (
         <EmptyState
           icon={PiggyBank}
