@@ -29,6 +29,7 @@ import { PAGE_SIZE_OPTIONS } from "@/lib/pagination";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { EmptyState } from "@/components/layout/EmptyState";
+import { LoadError } from "@/components/LoadError";
 import { Plus, Pencil, Trash2, Loader2, Palette, FolderOpen } from "lucide-react";
 
 export function CategoriesPage() {
@@ -36,6 +37,7 @@ export function CategoriesPage() {
   const [page, setPage] = useState(0);
   const [size, setSize] = useState(10);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingCategory, setEditingCategory] =
     useState<CategoryResponseDTO | null>(null);
@@ -52,8 +54,9 @@ export function CategoriesPage() {
     try {
       const res = await categoryApi.getAll({ page, size });
       setData(res);
+      setLoadError(false);
     } catch {
-      // error handled by UI state
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -142,7 +145,12 @@ export function CategoriesPage() {
         }
       />
 
-      {!data || data.totalElements === 0 ? (
+      {loadError ? (
+        <LoadError
+          title="No se pudieron cargar las categorías"
+          onRetry={fetchCategories}
+        />
+      ) : !data || data.totalElements === 0 ? (
         <EmptyState
           icon={Palette}
           title="No hay categorías creadas"

@@ -33,6 +33,7 @@ import { Separator } from "@/components/ui/separator";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { EmptyState } from "@/components/layout/EmptyState";
+import { LoadError } from "@/components/LoadError";
 import {
   Plus,
   Pencil,
@@ -49,6 +50,7 @@ import {
 export function DebtsPage() {
   const [debts, setDebts] = useState<DebtResponseDTO[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<DebtResponseDTO | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
@@ -81,11 +83,13 @@ export function DebtsPage() {
   const [paymentPageLoading, setPaymentPageLoading] = useState(false);
 
   const fetchDebts = useCallback(async () => {
+    setLoading(true);
+    setLoadError(false);
     try {
       const data = await debtApi.getAll();
       setDebts(data);
     } catch {
-      // error handled by UI state
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -285,7 +289,12 @@ export function DebtsPage() {
         }
       />
 
-      {debts.length === 0 ? (
+      {loadError ? (
+        <LoadError
+          title="No se pudieron cargar las deudas"
+          onRetry={fetchDebts}
+        />
+      ) : debts.length === 0 ? (
         <EmptyState
           icon={CreditCard}
           title="No hay deudas registradas"
