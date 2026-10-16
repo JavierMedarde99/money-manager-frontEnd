@@ -55,6 +55,7 @@ export function DebtsPage() {
   const [editing, setEditing] = useState<DebtResponseDTO | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<number | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [debtError, setDebtError] = useState<string | null>(null);
   const [deletingDebt, setDeletingDebt] = useState(false);
   const [saving, setSaving] = useState(false);
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -119,6 +120,7 @@ export function DebtsPage() {
     setTotalAmount(0);
     setStartDate(new Date().toISOString().split("T")[0]);
     setEndDate("");
+    setDebtError(null);
     setDialogOpen(true);
   };
 
@@ -128,12 +130,14 @@ export function DebtsPage() {
     setTotalAmount(debt.totalAmount);
     setStartDate(debt.startDate);
     setEndDate(debt.endDate ? debt.endDate : "");
+    setDebtError(null);
     setDialogOpen(true);
   };
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
+    setDebtError(null);
 
     const payload: DebtRequestDTO = {
       name,
@@ -150,8 +154,11 @@ export function DebtsPage() {
       }
       setDialogOpen(false);
       await fetchDebts();
-    } catch {
-      // error handled by UI state
+    } catch (error: unknown) {
+      const axiosError = error as { response?: { data?: { message?: string } } };
+      setDebtError(
+        axiosError.response?.data?.message || "No se pudo guardar la deuda"
+      );
     } finally {
       setSaving(false);
     }
@@ -509,14 +516,33 @@ export function DebtsPage() {
       )}
 
       {/* Create/Edit Debt Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent onClose={() => setDialogOpen(false)}>
+      <Dialog
+        open={dialogOpen}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setDebtError(null);
+        }}
+      >
+        <DialogContent
+          onClose={() => {
+            setDialogOpen(false);
+            setDebtError(null);
+          }}
+        >
           <DialogHeader>
             <DialogTitle>
               {editing ? "Editar Deuda" : "Nueva Deuda"}
             </DialogTitle>
           </DialogHeader>
           <form onSubmit={handleSave} className="space-y-4 mt-4">
+            {debtError && (
+              <div
+                role="alert"
+                className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center"
+              >
+                {debtError}
+              </div>
+            )}
             <div className="space-y-2">
               <Label htmlFor="debt-name">Nombre</Label>
               <Input

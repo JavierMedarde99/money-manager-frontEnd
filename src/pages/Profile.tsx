@@ -26,7 +26,8 @@ import { User, Mail, Lock, Save, Trash2, Loader2 } from "lucide-react";
 
 export function ProfilePage() {
   const navigate = useNavigate();
-  const { user, isLoading, updateProfile, deleteAccount } = useAuthStore();
+  const { user, isLoading, error: authError, clearError, updateProfile, deleteAccount } =
+    useAuthStore();
 
   const [username, setUsername] = useState(user?.username ?? "");
   const [email, setEmail] = useState(user?.email ?? "");
@@ -120,6 +121,22 @@ export function ProfilePage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleUpdate} className="space-y-4">
+            {authError && (
+              <div
+                role="alert"
+                className="rounded-full bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center"
+              >
+                {authError}
+                <button
+                  type="button"
+                  aria-label="Descartar error"
+                  onClick={clearError}
+                  className="ml-2 font-bold"
+                >
+                  ×
+                </button>
+              </div>
+            )}
             {success && (
               <div className="rounded-full bg-green-50 border border-green-200 p-3 text-sm text-green-600 text-center">
                 {success}
@@ -209,7 +226,10 @@ export function ProfilePage() {
             </div>
             <Button
               variant="destructive"
-              onClick={() => setShowDeleteDialog(true)}
+              onClick={() => {
+                clearError();
+                setShowDeleteDialog(true);
+              }}
             >
               <Trash2 className="h-4 w-4" />
               Eliminar
@@ -219,8 +239,19 @@ export function ProfilePage() {
       </Card>
 
       {/* Delete confirmation dialog */}
-      <Dialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
-        <DialogContent onClose={() => setShowDeleteDialog(false)}>
+      <Dialog
+        open={showDeleteDialog}
+        onOpenChange={(open) => {
+          setShowDeleteDialog(open);
+          if (!open) clearError();
+        }}
+      >
+        <DialogContent
+          onClose={() => {
+            setShowDeleteDialog(false);
+            clearError();
+          }}
+        >
           <DialogHeader>
             <DialogTitle>¿Eliminar tu cuenta?</DialogTitle>
             <DialogDescription>
@@ -229,6 +260,14 @@ export function ProfilePage() {
             </DialogDescription>
           </DialogHeader>
           <Separator />
+          {authError && (
+            <div
+              role="alert"
+              className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center"
+            >
+              {authError}
+            </div>
+          )}
           <DialogFooter>
             <Button
               variant="outline"
