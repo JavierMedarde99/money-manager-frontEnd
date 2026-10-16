@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { LoadError } from "@/components/LoadError";
+import { FETCH_ALL_SIZE } from "@/lib/pagination";
 import {
   ArrowRightLeft,
   TrendingUp,
@@ -75,7 +76,7 @@ export function DashboardPage() {
             from: monthFirstDay,
             to: monthLastDay,
           }),
-          debtApi.getAll(),
+          debtApi.getAll(0, FETCH_ALL_SIZE),
           categoryApi.getAllForOptions(),
         ]);
         setTransactions(txData.content);

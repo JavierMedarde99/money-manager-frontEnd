@@ -9,13 +9,15 @@ export const debtApi = {
     return apiClient.post("/debt", data).then((res) => res.data);
   },
 
-  getAll(page?: number, size?: number): Promise<DebtResponseDTO[]> {
+  /**
+   * `page` y `size` son obligatorios a propósito: el backend usa `size = 10`
+   * por defecto, y un default silencioso hacía que la app mostrara solo las
+   * primeras 10 deudas (y calculara mal los totales del Dashboard).
+   */
+  getAll(page: number, size: number): Promise<DebtResponseDTO[]> {
     return apiClient
       .get("/debt/all", {
-        params: {
-          page: page ?? 0,
-          size: size ?? 10,
-        },
+        params: { page, size },
       })
       .then((res) => res.data);
   },

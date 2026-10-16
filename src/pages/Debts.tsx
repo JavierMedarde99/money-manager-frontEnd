@@ -34,6 +34,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadError } from "@/components/LoadError";
+import { FETCH_ALL_SIZE } from "@/lib/pagination";
 import {
   Plus,
   Pencil,
@@ -87,7 +88,7 @@ export function DebtsPage() {
     setLoading(true);
     setLoadError(false);
     try {
-      const data = await debtApi.getAll();
+      const data = await debtApi.getAll(0, FETCH_ALL_SIZE);
       setDebts(data);
     } catch {
       setLoadError(true);
