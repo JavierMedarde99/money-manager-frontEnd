@@ -321,17 +321,21 @@ export function DebtsPage() {
                 <div className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
                   <button
                     type="button"
-                    className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-4 items-center text-left cursor-pointer"
+                    className="flex-1 min-w-0 grid grid-cols-1 sm:grid-cols-4 gap-4 items-center text-left cursor-pointer"
                     onClick={() => toggleExpand(debt.id)}
                     aria-expanded={isExpanded}
                     aria-controls={paymentsId}
                   >
                     <div>
-                      <p className="font-bold">{debt.name}</p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Calendar className="h-3 w-3" />
-                        {debt.startDate}
-                        {debt.endDate && ` → ${debt.endDate}`}
+                      <p className="font-bold truncate" title={debt.name}>
+                        {debt.name}
+                      </p>
+                      <p className="text-xs text-muted-foreground flex items-center gap-1 min-w-0">
+                        <Calendar className="h-3 w-3 shrink-0" />
+                        <span className="truncate">
+                          {debt.startDate}
+                          {debt.endDate && ` → ${debt.endDate}`}
+                        </span>
                       </p>
                     </div>
                     <div className="text-right sm:text-left">
@@ -369,7 +373,7 @@ export function DebtsPage() {
                       </Badge>
                     </div>
                   </button>
-                  <div className="flex items-center gap-1">
+                  <div className="flex shrink-0 items-center gap-1">
                     {!isPaid && (
                       <Button
                         variant="ghost"
