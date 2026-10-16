@@ -298,14 +298,18 @@ export function DebtsPage() {
             const progress = getProgress(debt);
             const isExpanded = expandedId === debt.id;
             const isPaid = remaining <= 0;
+            const paymentsId = `debt-payments-${debt.id}`;
 
             return (
               <Card key={debt.id} className="card-gloss overflow-hidden">
-                <div
-                  className="flex items-center gap-4 p-4 cursor-pointer hover:bg-muted/30 transition-colors"
-                  onClick={() => toggleExpand(debt.id)}
-                >
-                  <div className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-4 items-center">
+                <div className="flex items-center gap-4 p-4 hover:bg-muted/30 transition-colors">
+                  <button
+                    type="button"
+                    className="flex-1 grid grid-cols-1 sm:grid-cols-4 gap-4 items-center text-left cursor-pointer"
+                    onClick={() => toggleExpand(debt.id)}
+                    aria-expanded={isExpanded}
+                    aria-controls={paymentsId}
+                  >
                     <div>
                       <p className="font-bold">{debt.name}</p>
                       <p className="text-xs text-muted-foreground flex items-center gap-1">
@@ -348,7 +352,7 @@ export function DebtsPage() {
                         {isPaid ? "Pagada" : `${Math.round(progress)}%`}
                       </Badge>
                     </div>
-                  </div>
+                  </button>
                   <div className="flex items-center gap-1">
                     {!isPaid && (
                       <Button
@@ -389,15 +393,17 @@ export function DebtsPage() {
                       <Trash2 className="h-4 w-4" />
                     </Button>
                     {isExpanded ? (
-                      <ChevronUp className="h-4 w-4 text-muted-foreground" />
+                      <ChevronUp aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
                     ) : (
-                      <ChevronDown className="h-4 w-4 text-muted-foreground" />
+                      <ChevronDown aria-hidden="true" className="h-4 w-4 text-muted-foreground" />
                     )}
                   </div>
                 </div>
 
-                {/* Payments section */}
-                {isExpanded && (
+                {/* Payments section — kept in the DOM (hidden when collapsed) so
+                    the header button's aria-controls always points to a real id */}
+                <div id={paymentsId} hidden={!isExpanded}>
+                  {isExpanded && (
                   <div className="animate-bounce-in">
                     <Separator />
                     <div className="p-4">
@@ -486,6 +492,7 @@ export function DebtsPage() {
                     </div>
                   </div>
                 )}
+                </div>
               </Card>
             );
           })}
