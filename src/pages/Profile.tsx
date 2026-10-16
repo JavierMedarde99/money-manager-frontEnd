@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/store/auth";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
@@ -122,10 +123,7 @@ export function ProfilePage() {
         <CardContent>
           <form onSubmit={handleUpdate} className="space-y-4">
             {authError && (
-              <div
-                role="alert"
-                className="rounded-full bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center"
-              >
+              <Alert>
                 {authError}
                 <button
                   type="button"
@@ -135,12 +133,12 @@ export function ProfilePage() {
                 >
                   ×
                 </button>
-              </div>
+              </Alert>
             )}
             {success && (
-              <div className="rounded-full bg-green-50 border border-green-200 p-3 text-sm text-green-600 text-center">
+              <Alert variant="success" role="status">
                 {success}
-              </div>
+              </Alert>
             )}
 
             <div className="space-y-2">
@@ -260,14 +258,7 @@ export function ProfilePage() {
             </DialogDescription>
           </DialogHeader>
           <Separator />
-          {authError && (
-            <div
-              role="alert"
-              className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center"
-            >
-              {authError}
-            </div>
-          )}
+          {authError && <Alert>{authError}</Alert>}
           <DialogFooter>
             <Button
               variant="outline"

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Loader2 } from "lucide-react";
 import { debtApi } from "@/api/debt";
 import type { DebtRequestDTO, DebtResponseDTO } from "@/types";
+import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -72,14 +73,7 @@ export function DebtFormDialog({ debt, onClose, onSaved }: DebtFormDialogProps) 
           <DialogTitle>{debt ? "Editar Deuda" : "Nueva Deuda"}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-          {error && (
-            <div
-              role="alert"
-              className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center"
-            >
-              {error}
-            </div>
-          )}
+          {error && <Alert>{error}</Alert>}
           <div className="space-y-2">
             <Label htmlFor="debt-name">Nombre</Label>
             <Input
