@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card";
-import { DollarSign, Loader2, PieChart, CreditCard, Sparkles } from "lucide-react";
+import { DollarSign, Loader2, PieChart, CreditCard, Sparkles, AlertTriangle } from "lucide-react";
 import { z } from "zod";
 
 const loginSchema = z.object({
@@ -34,7 +34,7 @@ const features = [
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const { login, isLoading, error, clearError } = useAuthStore();
+  const { login, isLoading, error, clearError, sessionExpired, setSessionExpired } = useAuthStore();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [fieldErrors, setFieldErrors] = useState<{ username?: string; password?: string }>({});
@@ -147,6 +147,23 @@ export function LoginPage() {
             </CardHeader>
             <form onSubmit={handleSubmit}>
               <CardContent className="space-y-4">
+                {sessionExpired && (
+                  <div
+                    role="alert"
+                    className="flex items-center justify-center gap-2 rounded-full bg-amber-50 border border-amber-200 p-3 text-sm text-amber-700 text-center"
+                  >
+                    <AlertTriangle className="h-4 w-4 shrink-0" />
+                    <span>Tu sesión ha caducado. Inicia sesión de nuevo.</span>
+                    <button
+                      type="button"
+                      aria-label="Descartar aviso"
+                      onClick={() => setSessionExpired(false)}
+                      className="ml-1 font-bold px-1"
+                    >
+                      ×
+                    </button>
+                  </div>
+                )}
                 {error && (
                   <div className="rounded-full bg-red-50 border border-red-200 p-3 text-sm text-red-600 text-center">
                     {error}

@@ -9,6 +9,8 @@ interface AuthState {
   isLoading: boolean;
   initializing: boolean;
   error: string | null;
+  /** True when the backend invalidated the session (401) and the user was logged out. */
+  sessionExpired: boolean;
   login: (data: LoginRequestDTO) => Promise<void>;
   register: (data: UserRequestDTO) => Promise<void>;
   logout: () => void;
@@ -16,6 +18,7 @@ interface AuthState {
   updateProfile: (data: UserRequestDTO) => Promise<void>;
   deleteAccount: () => Promise<void>;
   clearError: () => void;
+  setSessionExpired: (expired: boolean) => void;
 }
 
 const hasToken = !!localStorage.getItem("token");
@@ -34,6 +37,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   isLoading: false,
   initializing: hasToken,
   error: null,
+  sessionExpired: false,
 
   login: async (data: LoginRequestDTO) => {
     set({ isLoading: true, error: null });
@@ -44,7 +48,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       // Fetch user profile after login
       const profile = await userApi.getProfile();
       localStorage.setItem("user", JSON.stringify(profile));
-      set({ user: profile, isAuthenticated: true });
+      set({ user: profile, isAuthenticated: true, sessionExpired: false });
     } catch (error: unknown) {
       const axiosError = error as { response?: { data?: { message?: string } } };
       const message =
@@ -122,4 +126,6 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   clearError: () => set({ error: null }),
+
+  setSessionExpired: (expired: boolean) => set({ sessionExpired: expired }),
 }));
