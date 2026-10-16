@@ -75,11 +75,17 @@ The whole app mounts inside an `ErrorBoundary` (`src/components/ErrorBoundary.ts
 src/
   api/          # Axios client + per-entity service modules
   store/        # Zustand stores (auth only)
-  components/   # ui/ (reusable), layout/ (Sidebar, MainLayout, ProtectedRoute), ErrorBoundary.tsx
+  hooks/        # Per-page state/logic hooks (useDebts)
+  components/   # ui/ (reusable), layout/ (Sidebar, MainLayout, ProtectedRoute), debts/, ErrorBoundary.tsx
   pages/        # One file per route: Login, Register, Dashboard, Transactions, Categories, Debts, Profile
   types/        # TypeScript interfaces mirroring backend DTOs
-  lib/          # cn() utility
+  lib/          # cn(), apiErrors, pagination, authEvents, debts (cálculos derivados)
 ```
+
+Pages keep one file per route; page-specific components and logic live in
+`components/<feature>/` (e.g. `components/debts/DebtCard.tsx`) and
+`hooks/use<Feature>.ts` (e.g. `hooks/useDebts.ts`), so a page stays a thin
+composition of view + hook.
 
 Routes (in `App.tsx`): `/login`, `/register` (public); `/`, `/transactions`, `/categories`, `/debts`, `/profile` (protected via `ProtectedRoute` → `MainLayout` with Sidebar).
 
