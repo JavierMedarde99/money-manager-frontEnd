@@ -117,6 +117,29 @@ export interface TransactionFilters {
   size?: number;
 }
 
+export interface TRANSACTION_TYPES {
+  INCOME: {
+    value: "INCOME";
+    label: "Ingreso";
+  };
+  EXPENSE: {
+    value: "EXPENSE";
+    label: "Gasto (próximamente)";
+  };
+}
+
+export const TRANSACTION_TYPES = [
+  TRANSACTION_TYPES.INCOME,
+  TRANSACTION_TYPES.EXPENSE,
+];
+
+export const SUPPORTED_TRANSACTION_TYPES = ["INCOME", "EXPENSE"];
+
+function normalizeTransactionType(value: string): string {
+  const upper = value.toUpperCase();
+  return SUPPORTED_TRANSACTION_TYPES.includes(upper) ? upper : "INCOME";
+}
+
 export interface SavingsResponseDTO {
   year: number;
   month: number;

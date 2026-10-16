@@ -59,7 +59,7 @@ import {
  */
 const TRANSACTION_TYPES = [
   { value: "INCOME", label: "Ingreso" },
-  { value: "EXPENSE", label: "Gasto (próximamente)", disabled: true },
+  { value: "EXPENSE", label: "Gasto" },
 ];
 
 const SUPPORTED_TRANSACTION_TYPES = ["INCOME"];
