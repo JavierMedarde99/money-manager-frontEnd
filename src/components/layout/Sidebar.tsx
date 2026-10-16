@@ -113,6 +113,7 @@ export function Sidebar() {
             variant="ghost"
             size="icon"
             onClick={handleLogout}
+            aria-label="Cerrar sesión"
             className="shrink-0 text-white/70 hover:text-white hover:bg-white/10"
           >
             <LogOut className="h-4 w-4" />
@@ -127,6 +128,8 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(!mobileOpen)}
+        aria-label="Abrir menú de navegación"
+        aria-expanded={mobileOpen}
         className="fixed top-4 left-4 z-[60] lg:hidden h-10 w-10 rounded-full bg-card border border-border shadow-lg flex items-center justify-center"
       >
         {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -159,6 +162,8 @@ export function Sidebar() {
           {sidebarContent}
           <button
             onClick={() => setCollapsed(!collapsed)}
+            aria-label={collapsed ? "Expandir menú lateral" : "Contraer menú lateral"}
+            aria-expanded={!collapsed}
             className="absolute -right-3 top-7 h-6 w-6 rounded-full bg-white border border-white/50 shadow-md flex items-center justify-center text-secondary hover:text-primary transition-colors"
           >
             <Menu className="h-3 w-3" />

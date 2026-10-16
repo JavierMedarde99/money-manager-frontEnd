@@ -175,6 +175,7 @@ export function CategoriesPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => openEdit(cat)}
+                      aria-label={`Editar ${cat.name}`}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -182,6 +183,7 @@ export function CategoriesPage() {
                       variant="ghost"
                       size="icon"
                       onClick={() => setDeleteConfirm(cat.id)}
+                      aria-label={`Eliminar ${cat.name}`}
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
