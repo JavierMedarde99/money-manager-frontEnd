@@ -35,6 +35,7 @@ import { PageHeader } from "@/components/layout/PageHeader";
 import { CandyLoader } from "@/components/layout/CandyLoader";
 import { EmptyState } from "@/components/layout/EmptyState";
 import { LoadError } from "@/components/LoadError";
+import { getApiErrorMessage } from "@/lib/apiErrors";
 import {
   Plus,
   Pencil,
@@ -49,10 +50,24 @@ import {
   AlertCircle,
   FolderOpen,
 } from "lucide-react";
+/**
+ * The backend only accepts INCOME today — sending EXPENSE returns
+ * "invalid value for type not found of Type". The option stays visible but
+ * disabled so users know it is coming, and `normalizeTransactionType` makes
+ * sure it is never sent.
+ */
 const TRANSACTION_TYPES = [
   { value: "INCOME", label: "Ingreso" },
-  { value: "EXPENSE", label: "Gasto" },
+  { value: "EXPENSE", label: "Gasto (próximamente)", disabled: true },
 ];
+
+const SUPPORTED_TRANSACTION_TYPES = ["INCOME"];
+
+/** Guards the payload: the backend only supports INCOME for now. */
+function normalizeTransactionType(value: string): string {
+  const upper = value.toUpperCase();
+  return SUPPORTED_TRANSACTION_TYPES.includes(upper) ? upper : "INCOME";
+}
 
 const TRANSACTION_SUBTYPES = [
   { value: "FIXED", label: "Fijo" },
@@ -185,7 +200,7 @@ export function TransactionsPage() {
     setTransactionDate(tx.transactionDate);
     setAmount(tx.amount || 1);
     setPrice(tx.price || 0);
-    setTransactionType(tx.transactionType.toUpperCase());
+    setTransactionType(normalizeTransactionType(tx.transactionType));
     setTransactionSubtype(tx.transactionSubtype.toUpperCase());
     setCategoryId(tx.category.id);
     setFormError(null);
@@ -204,7 +219,7 @@ export function TransactionsPage() {
       transactionDate,
       amount,
       price,
-      transactionType,
+      transactionType: normalizeTransactionType(transactionType),
       transactionSubtype,
       category: selectedCategory,
     };
@@ -218,9 +233,8 @@ export function TransactionsPage() {
       setDialogOpen(false);
       await fetchData();
     } catch (error: unknown) {
-      const axiosError = error as { response?: { data?: { message?: string } } };
       setFormError(
-        axiosError.response?.data?.message || "Error al guardar la transacción"
+        getApiErrorMessage(error, "No se pudo guardar la transacción")
       );
     } finally {
       setSaving(false);
@@ -595,10 +609,17 @@ export function TransactionsPage() {
                 <Label htmlFor="tx-type">Tipo</Label>
                 <Select
                   id="tx-type"
+                  aria-describedby="tx-type-hint"
                   options={TRANSACTION_TYPES}
                   value={transactionType}
                   onChange={(e) => setTransactionType(e.target.value)}
                 />
+                <p
+                  id="tx-type-hint"
+                  className="text-xs text-muted-foreground"
+                >
+                  Los gastos aún no están disponibles.
+                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tx-subtype">Subtipo</Label>
