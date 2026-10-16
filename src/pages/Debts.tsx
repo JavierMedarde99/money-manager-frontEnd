@@ -621,6 +621,7 @@ export function DebtsPage() {
                 </p>
               </div>
               <Toggle
+                id="pay-automatic"
                 checked={automaticPayment}
                 onCheckedChange={setAutomaticPayment}
               />
