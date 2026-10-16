@@ -117,6 +117,7 @@ export function SavingsPage() {
               variant="ghost"
               size="icon"
               onClick={goToPrevYear}
+              aria-label="Año anterior"
               disabled={yearsAsc.length === 0 || year === yearMin}
               className="h-8 w-8"
             >
@@ -129,6 +130,7 @@ export function SavingsPage() {
               variant="ghost"
               size="icon"
               onClick={goToNextYear}
+              aria-label="Año siguiente"
               disabled={yearsAsc.length === 0 || year === yearMax}
               className="h-8 w-8"
             >

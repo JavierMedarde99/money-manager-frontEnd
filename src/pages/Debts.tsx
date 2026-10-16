@@ -360,6 +360,7 @@ export function DebtsPage() {
                         }}
                         className="text-green-600 hover:text-green-700"
                         title="Registrar pago"
+                        aria-label={`Registrar pago de ${debt.name}`}
                       >
                         <Banknote className="h-4 w-4" />
                       </Button>
@@ -371,6 +372,7 @@ export function DebtsPage() {
                         e.stopPropagation();
                         openEdit(debt);
                       }}
+                      aria-label={`Editar ${debt.name}`}
                     >
                       <Pencil className="h-4 w-4" />
                     </Button>
@@ -381,6 +383,7 @@ export function DebtsPage() {
                         e.stopPropagation();
                         setDeleteConfirm(debt.id);
                       }}
+                      aria-label={`Eliminar ${debt.name}`}
                       className="text-destructive hover:text-destructive"
                     >
                       <Trash2 className="h-4 w-4" />
@@ -449,6 +452,7 @@ export function DebtsPage() {
                                           e.stopPropagation();
                                           openEditPayment(debt, payment);
                                         }}
+                                        aria-label={`Editar pago de ${payment.amount.toFixed(2)} €`}
                                       >
                                         <Pencil className="h-3 w-3" />
                                       </Button>
@@ -459,6 +463,7 @@ export function DebtsPage() {
                                           e.stopPropagation();
                                           setDeletePaymentConfirm({ debtId: debt.id, paymentId: payment.id });
                                         }}
+                                        aria-label={`Eliminar pago de ${payment.amount.toFixed(2)} €`}
                                         className="text-destructive hover:text-destructive"
                                       >
                                         <Trash2 className="h-3 w-3" />

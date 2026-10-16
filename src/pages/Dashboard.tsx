@@ -239,6 +239,7 @@ export function DashboardPage() {
                 variant="ghost"
                 size="icon"
                 onClick={goToPrevMonth}
+                aria-label="Mes anterior"
                 className="h-8 w-8"
               >
                 <ChevronLeft className="h-4 w-4" />
@@ -250,6 +251,7 @@ export function DashboardPage() {
                 variant="ghost"
                 size="icon"
                 onClick={goToNextMonth}
+                aria-label="Mes siguiente"
                 className="h-8 w-8"
               >
                 <ChevronRight className="h-4 w-4" />

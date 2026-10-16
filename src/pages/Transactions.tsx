@@ -479,6 +479,7 @@ export function TransactionsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => openEdit(tx)}
+                        aria-label={`Editar ${tx.name}`}
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -486,6 +487,7 @@ export function TransactionsPage() {
                         variant="ghost"
                         size="icon"
                         onClick={() => setDeleteConfirm(tx.id)}
+                        aria-label={`Eliminar ${tx.name}`}
                         className="text-destructive hover:text-destructive"
                       >
                         <Trash2 className="h-4 w-4" />
