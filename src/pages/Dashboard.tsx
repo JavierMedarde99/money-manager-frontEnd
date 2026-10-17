@@ -24,7 +24,6 @@ import {
   LayoutDashboard,
   ArrowUpRight,
   ArrowDownRight,
-  Plus,
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
@@ -531,31 +530,6 @@ export function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Quick Actions */}
-          <Card className="card-gloss">
-            <CardContent className="p-6">
-              <h3 className="font-display font-bold text-card-foreground mb-4 text-lg">
-                Acciones rápidas
-              </h3>
-              <div className="flex flex-wrap gap-3">
-                <Button onClick={() => navigate("/transactions")}>
-                  <Plus className="h-4 w-4" />
-                  Nueva Transacción
-                </Button>
-                <Button
-                  variant="secondary"
-                  onClick={() => navigate("/categories")}
-                >
-                  <FolderOpen className="h-4 w-4" />
-                  Categorías
-                </Button>
-                <Button variant="outline" onClick={() => navigate("/debts")}>
-                  <CreditCard className="h-4 w-4" />
-                  Nueva Deuda
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
         </>
       )}
     </div>
