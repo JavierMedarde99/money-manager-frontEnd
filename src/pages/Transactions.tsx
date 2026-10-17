@@ -9,6 +9,7 @@ import type {
   CategoryResponseDTO,
   PageTransactionResponseDTO,
 } from "@/types";
+import { TRANSACTION_TYPES, normalizeTransactionType } from "@/types";
 import { Alert } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -51,24 +52,6 @@ import {
   AlertCircle,
   FolderOpen,
 } from "lucide-react";
-/**
- * The backend only accepts INCOME today — sending EXPENSE returns
- * "invalid value for type not found of Type". The option stays visible but
- * disabled so users know it is coming, and `normalizeTransactionType` makes
- * sure it is never sent.
- */
-const TRANSACTION_TYPES = [
-  { value: "INCOME", label: "Ingreso" },
-  { value: "EXPENSE", label: "Gasto" },
-];
-
-const SUPPORTED_TRANSACTION_TYPES = ["INCOME"];
-
-/** Guards the payload: the backend only supports INCOME for now. */
-function normalizeTransactionType(value: string): string {
-  const upper = value.toUpperCase();
-  return SUPPORTED_TRANSACTION_TYPES.includes(upper) ? upper : "INCOME";
-}
 
 const TRANSACTION_SUBTYPES = [
   { value: "FIXED", label: "Fijo" },
@@ -606,17 +589,10 @@ export function TransactionsPage() {
                 <Label htmlFor="tx-type">Tipo</Label>
                 <Select
                   id="tx-type"
-                  aria-describedby="tx-type-hint"
                   options={TRANSACTION_TYPES}
                   value={transactionType}
                   onChange={(e) => setTransactionType(e.target.value)}
                 />
-                <p
-                  id="tx-type-hint"
-                  className="text-xs text-muted-foreground"
-                >
-                  Los gastos aún no están disponibles.
-                </p>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="tx-subtype">Subtipo</Label>

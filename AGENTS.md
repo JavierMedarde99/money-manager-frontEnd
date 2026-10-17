@@ -104,7 +104,9 @@ Source: `src/api/client.ts` reads `import.meta.env.VITE_API_URL`. Swagger: `http
 The backend has several known issues that affect the frontend:
 
 - **Debts payments are paginated**: `GET /debt/all` and `GET /debt/{id}` accept `page`/`size` and `DebtResponseDTO.payments` is a `PagePaymentResponseDTO` (`{ content, page, size, totalElements, totalPages }`), not an array. However, `/debt/{id}` does **not** expose `page`/`size` for a single debt's payments, so the expanded table shows only the first page with a "Página 1 de N" indicator.
-- **Transaction types**: Only `INCOME` is accepted. `EXPENSE` returns `"invalid value for type not found of Type"`. The frontend dropdown includes EXPENSE which will always fail.
+- **Transaction types**: Both `INCOME` and `EXPENSE` are accepted (`Type.java` maps
+  `income`/`expense`, case-insensitive). Responses return the lowercase name
+  (`income`/`expense`), so compare with `.toUpperCase()`.
 - **Transaction subtypes**: Only `FIXED` and `VARIABLE` are accepted. `ONE_TIME` is rejected.
 - **Payment fields**: `PaymentRequestDTO` requires `automaticPayment` (boolean). `PaymentResponseDTO` does not return it, so editing a payment resets it to `false`.
 - **Auth errors (403)**: Return empty body — causes Axios JSON parse errors in the frontend. The response interceptor only handles 401.
